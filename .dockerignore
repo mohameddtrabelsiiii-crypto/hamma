@@ -1,6 +1,10 @@
 .git
 node_modules
 .next
+out
+dist
+_next
+index.html
 .env*
 !.env.example
 npm-debug.log*
