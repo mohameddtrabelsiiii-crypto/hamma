@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 
 type Service = {
@@ -11,15 +11,25 @@ type Service = {
   price_tnd: number | null;
 };
 
+type OrderResponse = {
+  order?: { reference?: string; amount_tnd?: number | null };
+  payment_link?: string | null;
+  error?: string;
+  message?: string;
+};
+
 export default function HomePage() {
   const [services, setServices] = useState<Service[]>([]);
   const [selected, setSelected] = useState<Service | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [brief, setBrief] = useState("");
+  const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState("");
   const [reference, setReference] = useState("");
+  const [paymentLink, setPaymentLink] = useState("");
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function loadServices() {
@@ -36,30 +46,57 @@ export default function HomePage() {
     loadServices();
   }, []);
 
+  function handleFile(event: ChangeEvent<HTMLInputElement>) {
+    const next = event.target.files?.[0] ?? null;
+    if (next && next.size > 15 * 1024 * 1024) {
+      setFile(null);
+      setStatus("File is too large. Maximum size is 15 MB.");
+      event.target.value = "";
+      return;
+    }
+    setStatus("");
+    setFile(next);
+  }
+
   async function submitOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selected) return setStatus("Choose a service first.");
-
-    setStatus("Creating your order…");
-    setReference("");
-
-    const { data, error } = await supabase.rpc("create_order", {
-      p_service_id: selected.id,
-      p_customer_name: name,
-      p_customer_email: email,
-      p_brief: brief || null,
-      p_file_path: null,
-      p_amount_tnd: selected.price_tnd,
-    });
-
-    if (error) {
-      setStatus(error.message);
+    if (!selected) {
+      setStatus("Choose a service first.");
       return;
     }
 
-    const row = Array.isArray(data) ? data[0] : data;
-    setReference(row?.reference ?? "");
-    setStatus("Order created. Keep your TF reference and follow the payment instructions.");
+    setSubmitting(true);
+    setStatus("Creating your order…");
+    setReference("");
+    setPaymentLink("");
+
+    const form = new FormData();
+    form.append("service_slug", selected.slug);
+    form.append("customer_name", name);
+    form.append("customer_email", email);
+    form.append("brief", brief);
+    if (file) form.append("file", file);
+
+    const { data, error } = await supabase.functions.invoke<OrderResponse>("create-order", {
+      body: form,
+    });
+
+    if (error) {
+      setStatus(error.message || "Unable to create the order.");
+      setSubmitting(false);
+      return;
+    }
+
+    if (data?.error) {
+      setStatus(data.error);
+      setSubmitting(false);
+      return;
+    }
+
+    setReference(data?.order?.reference ?? "");
+    setPaymentLink(data?.payment_link ?? "");
+    setStatus(data?.message ?? "Order created. Keep your TF reference.");
+    setSubmitting(false);
   }
 
   return (
@@ -68,7 +105,7 @@ export default function HomePage() {
         <div>
           <span className="eyebrow">TASKFORGE AI</span>
           <h1>Fast AI-powered business services.</h1>
-          <p>Send a brief, get a checked result, and keep your TF reference for payment and delivery.</p>
+          <p>Send your brief and file, receive a checked result, and keep your TF reference for payment and delivery.</p>
         </div>
         <div className="status-pill">● Online</div>
       </header>
@@ -89,7 +126,7 @@ export default function HomePage() {
             >
               <div className="card-top">
                 <span className="tag">{service.slug}</span>
-                {service.price_tnd != null && <strong>{service.price_tnd} TND</strong>}
+                <strong>{service.price_tnd != null ? `${service.price_tnd} TND` : "Price on request"}</strong>
               </div>
               <h3>{service.name}</h3>
               <p>{service.description}</p>
@@ -102,20 +139,39 @@ export default function HomePage() {
         <div>
           <span className="eyebrow">NEW ORDER</span>
           <h2>{selected ? selected.name : "Tell us what you need"}</h2>
-          <p>Your details are used only to process this order.</p>
+          <p>Your details and uploaded file are used to process this order.</p>
         </div>
 
         <form onSubmit={submitOrder} className="form">
           <input required value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
           <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" />
           <textarea value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="Brief / instructions" rows={5} />
-          <button className="primary" disabled={!selected}>
-            Create order
+
+          <label className="file-field">
+            <span>Upload a source file <small>(optional, max 15 MB)</small></span>
+            <input type="file" onChange={handleFile} accept=".pdf,.xlsx,.xls,.csv,.docx,.txt,.rtf" />
+            {file && <small>Selected: {file.name}</small>}
+          </label>
+
+          <button className="primary" disabled={!selected || submitting}>
+            {submitting ? "Creating order…" : "Create order"}
           </button>
         </form>
 
         {status && <div className="notice">{status}</div>}
-        {reference && <div className="reference">TF reference: <strong>{reference}</strong></div>}
+
+        {reference && (
+          <div className="reference">
+            <div>TF reference: <strong>{reference}</strong></div>
+            {paymentLink ? (
+              <a className="payment-button" href={paymentLink} target="_blank" rel="noreferrer">
+                Continue to payment
+              </a>
+            ) : (
+              <small>Payment link will be provided after the merchant payment method is configured.</small>
+            )}
+          </div>
+        )}
       </section>
     </main>
   );
