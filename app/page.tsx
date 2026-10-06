@@ -205,6 +205,20 @@ export default function HomePage() {
     setAuthBusy(false);
   }
 
+  async function downloadResult(orderId: string) {
+    setAuthMessage("Preparing your checked result…");
+    try {
+      const { data, error } = await supabase.functions.invoke<{ url: string }>("download-order-result", {
+        body: { order_id: orderId }
+      });
+      if (error || !data?.url) throw new Error("Download unavailable. Refresh your orders and try again.");
+      window.location.assign(data.url);
+      setAuthMessage("Your download is ready.");
+    } catch (error) {
+      setAuthMessage(error instanceof Error ? error.message : "Download unavailable.");
+    }
+  }
+
   async function signOut() {
     await supabase.auth.signOut();
     setOrders([]);
@@ -420,11 +434,10 @@ export default function HomePage() {
                     <div><dt>Amount</dt><dd>{order.amount_tnd != null ? `${order.amount_tnd} TND` : "On request"}</dd></div>
                     <div><dt>File</dt><dd>{order.file_path ? "Uploaded" : "None"}</dd></div>
                   </dl>
-                  {order.result_text && (
-                    <div className="result-box">
-                      <small>{order.result_checked ? "Checked result" : "Result"}</small>
-                      <p>{order.result_text}</p>
-                    </div>
+                  {order.status === "delivered" && order.result_checked && (
+                    <button className="secondary" type="button" onClick={() => downloadResult(order.id)}>
+                      Download checked result
+                    </button>
                   )}
                 </article>
               ))}
