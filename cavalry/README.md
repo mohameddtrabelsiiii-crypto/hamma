@@ -1,0 +1,1 @@
+Cavalry is the autonomous operating layer for TaskForge AI. It owns planning, implementation, QA, optimization and reporting subject to external-authority boundaries.
