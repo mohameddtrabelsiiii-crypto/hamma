@@ -1,3 +1,4 @@
+import { dispatchPaidCsv } from './dispatch.mjs';
 import { createClient } from "npm:@supabase/supabase-js@2.117.2";
 import { Webhook } from "npm:standardwebhooks@1.1.1";
 
@@ -79,7 +80,19 @@ Deno.serve(async (req: Request) => {
       ? await supabase.from("whop_events").select("id,processed").eq("whop_event_id", whopEventId).maybeSingle()
       : { data: null };
 
-    if (existing?.processed) return json({ ok: true, duplicate: true });
+    const dispatch = async () => {
+      if (eventType === "payment.succeeded" && order?.id) {
+        await dispatchPaidCsv(supabase, order.id, {
+          url: Deno.env.get("SUPABASE_URL"),
+          key: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")
+        });
+      }
+    };
+    // Retry dispatch even when recording the payment succeeded on a previous attempt.
+    if (existing?.processed) {
+      await dispatch();
+      return json({ ok: true, duplicate: true });
+    }
 
     const { data: savedEvent, error: saveError } = await supabase
       .from("whop_events")
@@ -146,6 +159,7 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    await dispatch();
     return json({ ok: true, event_type: eventType, order_reference: orderReference || null });
   } catch (error) {
     return json({
