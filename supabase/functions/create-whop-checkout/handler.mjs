@@ -30,7 +30,8 @@ export function createHandler(env, fetcher = fetch) {
       if (!Number.isFinite(amount) || amount<=0) return reply({error:'Your project is awaiting a confirmed price.'},409);
       // Do not take a payment until the verification channel is configured too.
       if (!env.WHOP_COMPANY_API_KEY || !env.WHOP_COMPANY_ID || !env.WHOP_WEBHOOK_SECRET) return reply({error:'Online payment is not available yet. Your project is saved; please return later.'},503);
-      const appUrl=new URL(env.APP_URL || 'https://taskforge-cavalry.mohameddtrabelsiiii.workers.dev/');
+      const configuredUrl=new URL(env.APP_URL || 'https://taskforge-ai.pages.dev/');
+      const appUrl=configuredUrl.hostname.endsWith('.workers.dev') ? new URL('https://taskforge-ai.pages.dev/') : configuredUrl;
       if (appUrl.protocol!=='https:') throw new Error('Invalid app URL');
       appUrl.pathname='/'; appUrl.search=''; appUrl.hash='account';
       const payload={
