@@ -32,11 +32,22 @@ test('Rejects anonymous and unpaid callers before file access',async()=>{
  const f=fixture();assert.equal((await f.handle(f.req('bad'))).status,401);assert.equal(f.calls,0);
  const unpaid=fixture('awaiting_payment');assert.equal((await unpaid.handle(unpaid.req())).status,409);assert.equal(unpaid.uploaded,null);
 });
-test('Paid order produces private review result; replay is rejected',async()=>{
- const f=fixture();assert.equal((await f.handle(f.req())).status,200);
- assert.equal(f.order.status,'needs_review');assert.equal(f.order.result_checked,false);assert.match(f.uploaded,/"001"/);
- assert.equal(JSON.parse(f.order.result_text).output_bucket,'order-files');assert.equal(f.order.delivered_at,undefined);
+test('Safe paid CSV auto-delivers with a checked private result; replay is rejected',async()=>{
+ const f=fixture();const response=await f.handle(f.req());assert.equal(response.status,200);
+ assert.equal((await response.json()).status,'delivered');
+ assert.equal(f.order.status,'delivered');assert.equal(f.order.result_checked,true);assert.match(f.uploaded,/"001"/);
+ assert.equal(JSON.parse(f.order.result_text).output_bucket,'order-files');
+ assert.ok(Number.isFinite(Date.parse(f.order.delivered_at)));
  assert.equal((await f.handle(f.req())).status,409);
+});
+test('Paid CSV with formula cells or duplicate rows stays private for review',async()=>{
+ for(const input of ['a,b\n1,=SUM(A1)\n','a,b\n1,x\n1,x\n']){
+  const f=fixture('paid',input);const response=await f.handle(f.req());assert.equal(response.status,200);
+  assert.equal((await response.json()).status,'needs_review');
+  assert.equal(f.order.status,'needs_review');assert.equal(f.order.result_checked,false);
+  assert.equal(f.order.delivered_at,null);assert.equal(JSON.parse(f.order.result_text).output_bucket,'order-files');
+  assert.equal((await f.handle(f.req())).status,409);
+ }
 });
 test('Malformed paid input is held for review',async()=>{
  const f=fixture('paid','a,b\n1');assert.equal((await f.handle(f.req())).status,422);assert.equal(f.order.status,'needs_review');assert.equal(f.uploaded,null);
