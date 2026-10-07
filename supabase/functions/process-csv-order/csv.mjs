@@ -26,8 +26,8 @@ export function cleanCsv(input) {
   if (cleaned[0].some(v=>!v) || new Set(cleaned[0]).size!==width) throw new Error('Missing or duplicate headers; manual review required.');
   const seen = new Set(); let duplicateRows = 0;
   for (const r of cleaned.slice(1)) {const k=JSON.stringify(r);if(seen.has(k))duplicateRows++;seen.add(k);}
-  // Formula-like values need human review; retain originals in private storage.
   for (const r of cleaned) for(const v of r) if(/^[=+@-]/.test(v))formulaCells++;
+  const requiresHumanReview = formulaCells > 0 || duplicateRows > 0;
   const csv=cleaned.map(r=>r.map(v=>'"'+v.replaceAll('"','""')+'"').join(',')).join('\r\n')+'\r\n';
-  return {csv, report:{dataRows:cleaned.length-1,columns:width,trimmedCells,removedBlankRows,duplicateRowsRetained:duplicateRows,formulaCells,requiresHumanReview:true}};
+  return {csv, report:{dataRows:cleaned.length-1,columns:width,trimmedCells,removedBlankRows,duplicateRowsRetained:duplicateRows,formulaCells,requiresHumanReview}};
 }
