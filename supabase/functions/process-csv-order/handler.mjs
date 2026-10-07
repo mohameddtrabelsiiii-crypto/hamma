@@ -27,9 +27,14 @@ export function createHandler(env, fetcher=fetch) {
       const output='results/'+id+'/'+crypto.randomUUID()+'.csv';
       const upload=await fetcher(base+'/storage/v1/object/order-files/'+output,{method:'POST',headers:{...headers,'content-type':'text/csv; charset=utf-8','x-upsert':'false'},body:result.csv});
       if(!upload.ok)throw new Error('Result upload failed');
-      const done=await api(orderPath+'&status=eq.processing','PATCH',{status:'needs_review',result_checked:false,result_text:JSON.stringify({processor:'csv-cleanup-v1',output_bucket:'order-files',output_path:output,report:result.report})});
+      const resultText=JSON.stringify({processor:'csv-cleanup-v1',output_bucket:'order-files',output_path:output,report:result.report});
+      const autoDeliver=result.report.requiresHumanReview===false;
+      const next=autoDeliver
+        ? {status:'delivered',result_checked:true,result_text:resultText,delivered_at:new Date().toISOString()}
+        : {status:'needs_review',result_checked:false,result_text:resultText,delivered_at:null};
+      const done=await api(orderPath+'&status=eq.processing','PATCH',next);
       if(!done?.length)throw new Error('Order state changed during processing');
-      return reply({order_id:id,status:'needs_review',report:result.report});
+      return reply({order_id:id,status:autoDeliver?'delivered':'needs_review',report:result.report});
     } catch(error) {
       if(claimed)try{await api(orderPath+'&status=eq.processing','PATCH',{status:'needs_review',result_checked:false,result_text:JSON.stringify({processor:'csv-cleanup-v1',error:'Automatic processing could not complete. Review source and retry manually.'})});}catch{ /* Leave processing state for operator recovery. */ }
       return reply({error:'Processing could not complete; manual review required'},422);
