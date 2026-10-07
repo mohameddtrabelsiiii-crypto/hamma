@@ -15,3 +15,31 @@ test('checkout route requires login and forwards only the order reference',async
  assert.equal((await worker()(post('/api/checkout',{reference:'TF-1234ABCD'}))).status,401);
  const r=await worker(async(url,opts)=>{assert.match(url,/create-whop-checkout$/);assert.equal(opts.headers.authorization,'Bearer user-token');assert.deepEqual(JSON.parse(opts.body),{reference:'TF-1234ABCD'});return Response.json({error:'Online payment is not available yet.'},{status:503});})(post('/api/checkout',{reference:'TF-1234ABCD',amount:1},{authorization:'Bearer user-token'}));assert.equal(r.status,503);
 });
+
+test('service landing pages show accurate scopes, intake links and canonical URLs',async()=>{
+ const pages=['/services/pdf-to-excel','/services/spreadsheet-cleanup','/services/company-list','/services/cv-writing'];
+ for(const path of pages){
+  const response=await worker()(new Request('https://taskforge.example'+path));
+  assert.equal(response.status,200);
+  const html=await response.text();
+  assert.match(html,/TaskForge AI/);
+  assert.ok(html.includes('href="/#order"'));
+  assert.ok(html.includes('href="https://taskforge-ai.pages.dev'+path+'"'));
+  assert.equal((await worker()(new Request('https://taskforge.example'+path,{method:'POST'}))).status,405);
+ }
+});
+test('robots and sitemap list real service landing pages, with HEAD support',async()=>{
+ const w=worker();
+ const robots=await w(new Request('https://taskforge.example/robots.txt'));
+ assert.equal(robots.status,200);
+ assert.match(await robots.text(),/Sitemap: https:\/\/taskforge-ai\.pages\.dev\/sitemap\.xml/);
+ const map=await w(new Request('https://taskforge.example/sitemap.xml'));
+ assert.equal(map.status,200);
+ const xml=await map.text();
+ for(const path of ['/','/services/pdf-to-excel','/services/spreadsheet-cleanup','/services/company-list','/services/cv-writing']){
+  assert.ok(xml.includes('<loc>https://taskforge-ai.pages.dev'+path+'</loc>'));
+ }
+ const head=await w(new Request('https://taskforge.example/sitemap.xml',{method:'HEAD'}));
+ assert.equal(head.status,200);assert.equal(await head.text(),'');
+ assert.equal((await w(new Request('https://taskforge.example/sitemap.xml',{method:'POST'}))).status,405);
+});
