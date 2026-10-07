@@ -12,8 +12,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm install
+      - run: npm install --no-audit --no-fund
+      - run: node scripts/build-pages.mjs
+      - run: node --check dist/_worker.js
+      - run: node --test worker.test.mjs supabase/functions/*/*.test.mjs
       - run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://epkhqmhhzwlbxxypywau.supabase.co
