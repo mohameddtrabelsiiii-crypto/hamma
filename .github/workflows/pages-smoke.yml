@@ -1,0 +1,19 @@
+name: Verify TaskForge Pages URL
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check HTTPS homepage
+        run: |
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors --retry-delay 3 --max-time 20 https://taskforge-ai.pages.dev/ -o /tmp/taskforge-home.html
+          grep -q "TaskForge AI" /tmp/taskforge-home.html
+          grep -q "Submit your project" /tmp/taskforge-home.html
+          if grep -qi "mohameddtrabelsiiii" /tmp/taskforge-home.html; then echo "Personal identifier is exposed"; exit 1; fi
+      - name: Check API method guard
+        run: |
+          code=$(curl --silent --show-error --max-time 20 -o /tmp/taskforge-order-response -w "%{http_code}" https://taskforge-ai.pages.dev/api/order)
+          test "$code" = "405"
