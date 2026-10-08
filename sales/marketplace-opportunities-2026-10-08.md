@@ -46,3 +46,9 @@ Apply selectively to one or two still-open opportunities via authorized marketpl
 
 ## Current measured commercial state
 0 B2B leads and 0 confirmed payments in the TaskForge database as of this inspection. Opportunity listings are NOT customers. Whop merchant verification and public production landing-page promotion remain separate blockers.
+
+## Verification update (8 Oct 2026, later check)
+- Previously prioritized `CRM Automation for Lead Management` https://www.upwork.com/freelance-jobs/apply/CRM-Automation-for-Lead-Management_~022095516729310722947/ explicitly displays **"This job is no longer available"** and must NOT be treated as an actionable lead.
+- More recent relevant advertised listings include [HubSpot + WordPress CRM Automation Expert](https://www.upwork.com/freelance-jobs/apply/HubSpot-WordPress-CRM-Automation-Expert-Lead-Nurture-Calendly-Stripe-Chatbot_~022105459939853416553/) at $1,500 and [real estate marketing contact-list cleanup test](https://www.upwork.com/freelance-jobs/apply/Data-Entry-Marketing-List-Cleanup-CRM-Import-Real-Estate-Test-Project_~022098685662460033342/) at $100. Availability remains subject to signed-in Upwork confirmation; the HubSpot project is broader than TaskForge's demonstrated integration capabilities.
+- The final, truth-preserving application copy and possible Project Catalog listing are in [sales/upwork-first-revenue-ready-2026-10-08.md](./upwork-first-revenue-ready-2026-10-08.md).
+- No automated applications have been sent. The connected remote desktop is offline; Upwork submission requires an authenticated interactive session or account owner action.
