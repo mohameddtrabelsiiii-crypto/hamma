@@ -267,3 +267,21 @@ test('CRM cleanup safely handles quoted CSV, formula injection, missing IDs and 
  assert.throws(()=>ctx.crm.parseCsv('name,email\nA,B,C'),/inconsistent/);
  assert.throws(()=>ctx.crm.compare('name,email\n','name,email\nOld,a@example.test\n'),/at least one contact/);
 });
+
+test('free page analytics are restricted to marketing pages, not local-only demos',async()=>{
+ const w=worker();
+ for(const path of ['/','/automation','/services/crm-csv-cleanup']){
+  const response=await w(new Request('https://taskforge.example'+path));
+  assert.equal(response.status,200);
+  const html=await response.text();
+  assert.ok(html.includes('static.cloudflareinsights.com/beacon.min.js'));
+  assert.ok(html.includes('Privacy-friendly page performance analytics'));
+  assert.match(response.headers.get('content-security-policy'),/cloudflareinsights.com/);
+ }
+ for(const path of ['/automation/demo','/automation/leadops']){
+  const response=await w(new Request('https://taskforge.example'+path));
+  const html=await response.text();
+  assert.ok(!html.includes('beacon.min.js'));
+  assert.match(response.headers.get('content-security-policy'),/connect-src 'none'/);
+ }
+});
