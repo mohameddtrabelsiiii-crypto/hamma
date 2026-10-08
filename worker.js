@@ -46,6 +46,8 @@ function serviceHtml(path,detail){
  '<p style="line-height:1.7;color:#b9c0d4">'+detail.note+'</p>'+(detail.extra||'')+'<p>Scope, price and timing are confirmed before any payment.</p>'+
  '<a style="color:#9fe6b8" href="/?service='+serviceSlug+'#order">Submit a project brief</a> · <a style="color:#9fe6b8" href="/">All services</a></main></body></html>';
 }
+const ANALYTICS_BEACON="<script defer src=\"https://static.cloudflareinsights.com/beacon.min.js\" data-cf-beacon='{\"token\":\"074c167939c449ec9e9cece921ec5060\"}'></script>";
+function marketingHtml(html){return html.replace('</head>',ANALYTICS_BEACON+'</head>').replace('</main></body>','<p style="color:#8992aa;font-size:12px">Privacy-friendly page performance analytics by Cloudflare; no analytics cookies.</p></main></body>');}
 const BASE='https://epkhqmhhzwlbxxypywau.supabase.co/functions/v1/';
 function json(value,status=200){return new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'}})}
 async function handle(request){
@@ -77,12 +79,12 @@ async function handle(request){
  }
  if(url.pathname==='/automation'){
   if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405});
-  return new Response(request.method==='HEAD'?null:AUTOMATION_HTML,{headers:{...publicHeaders,'content-type':'text/html; charset=utf-8','content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"}});
+  return new Response(request.method==='HEAD'?null:marketingHtml(AUTOMATION_HTML),{headers:{...publicHeaders,'content-type':'text/html; charset=utf-8','content-security-policy':"default-src 'self'; script-src 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'unsafe-inline'; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"}});
  }
  const detail=SERVICE_DETAILS[url.pathname];
  if(detail){
   if(request.method!=='GET'&&request.method!=='HEAD')return new Response('Method not allowed',{status:405});
-  return new Response(request.method==='HEAD'?null:serviceHtml(url.pathname,detail),{headers:{...publicHeaders,'content-type':'text/html; charset=utf-8','content-security-policy':"default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"}});
+  return new Response(request.method==='HEAD'?null:marketingHtml(serviceHtml(url.pathname,detail)),{headers:{...publicHeaders,'content-type':'text/html; charset=utf-8','content-security-policy':"default-src 'none'; script-src https://static.cloudflareinsights.com; connect-src https://cloudflareinsights.com; style-src 'unsafe-inline'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"}});
  }
  if(['/api/login','/api/signup','/api/result','/api/checkout','/api/status'].includes(url.pathname)){
   if(request.method!=='POST')return json({error:'Method not allowed'},405);
@@ -146,6 +148,6 @@ async function handle(request){
  }
  if(url.pathname!=='/')return new Response('Not found',{status:404});
  if(!['GET','HEAD'].includes(request.method))return new Response('Method not allowed',{status:405});
- return new Response(request.method==='HEAD'?null:HTML,{headers:{'content-type':'text/html;charset=UTF-8','x-content-type-options':'nosniff','referrer-policy':'strict-origin-when-cross-origin','content-security-policy':"default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"}});
+ return new Response(request.method==='HEAD'?null:marketingHtml(HTML),{headers:{'content-type':'text/html;charset=UTF-8','x-content-type-options':'nosniff','referrer-policy':'strict-origin-when-cross-origin','content-security-policy':"default-src 'self'; script-src 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'unsafe-inline'; connect-src 'self' https://cloudflareinsights.com; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"}});
 }
 addEventListener('fetch',event=>event.respondWith(handle(event.request)));
