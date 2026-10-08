@@ -6,7 +6,7 @@ export function createHandler(env, fetcher=fetch) {
   if(request.method==='OPTIONS')return new Response('ok',{headers:cors});
   if(request.method!=='POST')return reply({error:'Method not allowed'},405);
   const token=request.headers.get('authorization');
-  if(!token||!/^Bearer [^\\s]+$/.test(token))return reply({error:'Sign in to check your project status.'},401);
+  if(!token||!token.startsWith('Bearer ')||!token.slice(7)||/\s/.test(token.slice(7)))return reply({error:'Sign in to check your project status.'},401);
   const length=Number(request.headers.get('content-length'));
   if(Number.isFinite(length)&&length>1024)return reply({error:'Request too large'},413);
   let body;try {const text=await request.text();if(text.length>1024)return reply({error:'Request too large'},413);body=JSON.parse(text);}
