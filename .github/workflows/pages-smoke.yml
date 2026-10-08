@@ -15,6 +15,21 @@ jobs:
           grep -q "TaskForge AI" /tmp/taskforge-home.html
           grep -q "Submit your project" /tmp/taskforge-home.html
           if grep -qi "mohameddtrabelsiiii" /tmp/taskforge-home.html; then echo "Personal identifier is exposed"; exit 1; fi
+      - name: Verify customer portal status interface
+        run: |
+          grep -Fq 'id="check-status"' /tmp/taskforge-home.html
+          grep -Fq 'Check project status' /tmp/taskforge-home.html
+          grep -Fq '/api/status' /tmp/taskforge-home.html
+      - name: Verify project tracking and checkout reject anonymous requests
+        run: |
+          for endpoint in status checkout result; do
+            code=$(curl --silent --show-error --max-time 20 -o "/tmp/taskforge-${endpoint}-denied.json" -w "%{http_code}" -H "Content-Type: application/json" -d '{"reference":"TF-1234ABCD"}' "https://taskforge-ai.pages.dev/api/${endpoint}")
+            test "$code" = "401"
+          done
+      - name: Check customer forms reject invalid orders
+        run: |
+          code=$(curl --silent --show-error --max-time 20 -o /tmp/taskforge-invalid-order.json -w "%{http_code}" -F 'service_slug=nonexistent-service' -F 'customer_name=Test' -F 'customer_email=invalid' -F 'brief=' https://taskforge-ai.pages.dev/api/order)
+          test "$code" = "400"
       - name: Check API method guard
         run: |
           code=$(curl --silent --show-error --max-time 20 -o /tmp/taskforge-order-response -w "%{http_code}" https://taskforge-ai.pages.dev/api/order)
