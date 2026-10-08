@@ -23,7 +23,7 @@ test('service landing pages show accurate scopes, intake links and canonical URL
   assert.equal(response.status,200);
   const html=await response.text();
   assert.match(html,/TaskForge AI/);
-  assert.ok(html.includes('href="/#order"'));
+  assert.ok(html.includes('href="/?service='));
   assert.ok(html.includes('href="https://taskforge-ai.pages.dev'+path+'"'));
   assert.equal((await worker()(new Request('https://taskforge.example'+path,{method:'POST'}))).status,405);
  }
@@ -42,4 +42,26 @@ test('robots and sitemap list real service landing pages, with HEAD support',asy
  const head=await w(new Request('https://taskforge.example/sitemap.xml',{method:'HEAD'}));
  assert.equal(head.status,200);assert.equal(await head.text(),'');
  assert.equal((await w(new Request('https://taskforge.example/sitemap.xml',{method:'POST'}))).status,405);
+});
+test('authenticated project status proxy exposes only the caller reference',async()=>{
+ const anonymous=await worker()(post('/api/status',{reference:'TF-1234ABCD'}));
+ assert.equal(anonymous.status,401);
+ assert.equal((await worker()(post('/api/status',{reference:'TF-1234ABCD'},{origin:'https://attacker.test','authorization':'Bearer test-user'}))).status,403);
+ let called=0;
+ const r=await worker(async(url,opts)=>{
+  called++;assert.match(url,/\/functions\/v1\/order-status$/);
+  assert.equal(opts.headers.authorization,'Bearer access-user');
+  assert.deepEqual(JSON.parse(opts.body),{reference:'TF-1234ABCD'});
+  return Response.json({reference:'TF-1234ABCD',phase:'reviewing',quote_amount_tnd:null,can_download:false,created_at:'2026-10-01T00:00:00Z'});
+ })(post('/api/status',{reference:'TF-1234ABCD',other_customer:'blocked'},{authorization:'Bearer access-user'}));
+ assert.equal(called,1);assert.equal(r.status,200);
+ assert.equal((await r.json()).phase,'reviewing');
+ assert.equal(r.headers.get('cache-control'),'no-store');
+ assert.equal((await worker()(new Request('https://taskforge.example/api/status'))).status,405);
+});
+test('homepage provides tracking and service preselection without accepting payment',async()=>{
+ const html=await (await worker()(new Request('https://taskforge.example/'))).text();
+ assert.match(html,/id="check-status"/);
+ assert.match(html,/searchParams.get\('service'\)/);
+ assert.match(html,/Check project status/);
 });
