@@ -3,6 +3,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: '23 6 * * *'
 jobs:
   smoke:
     runs-on: ubuntu-latest
@@ -17,3 +19,13 @@ jobs:
         run: |
           code=$(curl --silent --show-error --max-time 20 -o /tmp/taskforge-order-response -w "%{http_code}" https://taskforge-ai.pages.dev/api/order)
           test "$code" = "405"
+      - name: Check public discovery and service pages
+        run: |
+          curl --fail --silent --show-error --location --retry 3 --max-time 20 https://taskforge-ai.pages.dev/robots.txt -o /tmp/taskforge-robots.txt
+          grep -Fq "Sitemap: https://taskforge-ai.pages.dev/sitemap.xml" /tmp/taskforge-robots.txt
+          curl --fail --silent --show-error --location --retry 3 --max-time 20 https://taskforge-ai.pages.dev/sitemap.xml -o /tmp/taskforge-sitemap.xml
+          for path in pdf-to-excel spreadsheet-cleanup company-list cv-writing; do
+            grep -Fq "<loc>https://taskforge-ai.pages.dev/services/.github/workflows/pages-smoke.yml</loc>" /tmp/taskforge-sitemap.xml
+            curl --fail --silent --show-error --location --retry 3 --max-time 20 "https://taskforge-ai.pages.dev/services/.github/workflows/pages-smoke.yml" -o "/tmp/taskforge-service-.github/workflows/pages-smoke.yml.html"
+            grep -Fq "href=\"https://taskforge-ai.pages.dev/services/.github/workflows/pages-smoke.yml\"" "/tmp/taskforge-service-.github/workflows/pages-smoke.yml.html"
+          done
