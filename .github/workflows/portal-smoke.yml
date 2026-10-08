@@ -31,3 +31,14 @@ jobs:
           code=$(curl --silent --show-error --max-time 25 -o /tmp/status-public.json -w "%{http_code}" -H "Content-Type: application/json" -d '{"reference":"TF-1234ABCD"}' "$url")
           test "$code" = "401"
           if grep -Eqi 'customer_email|service.secret|service-role' /tmp/status-public.json; then echo "Sensitive field leaked"; exit 1; fi
+      - name: Verify invalid order submissions cannot create customer orders
+        run: |
+          url="https://epkhqmhhzwlbxxypywau.supabase.co/functions/v1/taskforge-public/api/order"
+          code=$(curl --silent --show-error --max-time 25 -o /tmp/order-reject.json -w "%{http_code}" -F "service_slug=nonexistent-service" -F "customer_name=Test" -F "customer_email=invalid" -F "brief=" "$url")
+          test "$code" = "400"
+          grep -Fq "Choose a valid service" /tmp/order-reject.json
+      - name: Verify checkout requires login
+        run: |
+          url="https://epkhqmhhzwlbxxypywau.supabase.co/functions/v1/taskforge-public/api/checkout"
+          code=$(curl --silent --show-error --max-time 25 -o /tmp/checkout-reject.json -w "%{http_code}" -H "Content-Type: application/json" -d '{"reference":"TF-1234ABCD"}' "$url")
+          test "$code" = "401"
