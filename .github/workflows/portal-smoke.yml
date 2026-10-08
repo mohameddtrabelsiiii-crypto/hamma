@@ -1,0 +1,33 @@
+name: Check TaskForge Customer Portal
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '47 6 * * *'
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify customer portal homepage
+        run: |
+          url="https://epkhqmhhzwlbxxypywau.supabase.co/functions/v1/taskforge-public"
+          curl --fail --silent --show-error --location --retry 3 --retry-delay 2 --max-time 25 "$url" -o /tmp/portal-home.html
+          grep -Fq "TaskForge AI" /tmp/portal-home.html
+          grep -Fq "Check project status" /tmp/portal-home.html
+          grep -Fq "/functions/v1/taskforge-public/api/status" /tmp/portal-home.html
+          if grep -qi "mohameddtrabelsiiii" /tmp/portal-home.html; then echo "Unexpected identifier in public homepage"; exit 1; fi
+      - name: Verify service-specific order intake
+        run: |
+          url="https://epkhqmhhzwlbxxypywau.supabase.co/functions/v1/taskforge-public/services/spreadsheet-cleanup"
+          curl --fail --silent --show-error --location --retry 3 --max-time 25 "$url" -o /tmp/portal-service.html
+          grep -Fq "Spreadsheet cleanup" /tmp/portal-service.html
+          grep -Fq "href=\"/functions/v1/taskforge-public/?service=spreadsheet-cleanup#order\"" /tmp/portal-service.html
+      - name: Verify unauthorized status lookup is blocked
+        run: |
+          url="https://epkhqmhhzwlbxxypywau.supabase.co/functions/v1/taskforge-public/api/status"
+          code=$(curl --silent --show-error --max-time 25 -o /tmp/status-public.json -w "%{http_code}" -H "Content-Type: application/json" -d '{"reference":"TF-1234ABCD"}' "$url")
+          test "$code" = "401"
+          if grep -Eqi 'customer_email|service.secret|service-role' /tmp/status-public.json; then echo "Sensitive field leaked"; exit 1; fi
