@@ -195,3 +195,14 @@ test('serves IndexNow ownership proof only to safe read methods',async()=>{
  assert.equal(await head.text(),'');
  assert.equal((await w(new Request('https://taskforge.example'+path,{method:'POST'}))).status,405);
 });
+
+test('CRM landing route is shown and indexed',async()=>{
+ const w=worker();
+ const r=await w(new Request('https://taskforge.example/services/crm-csv-cleanup'));
+ assert.equal(r.status,200);
+ const body=await r.text();
+ assert.ok(body.includes('CSV & CRM Lead Cleanup'));
+ assert.ok(body.includes('service=spreadsheet-cleanup'));
+ const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ assert.ok(sitemap.includes('/services/crm-csv-cleanup'));
+});
