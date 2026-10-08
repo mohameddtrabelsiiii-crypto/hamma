@@ -110,7 +110,7 @@ async function handle(request){
    const trim=(value,max)=>typeof value==='string'&&value.length<=max?value.trim():null;
    const name=trim(data.name,160),email=trim(data.email,254),company=trim(data.company,160),need=trim(data.need,5000),budget=trim(data.budget,60);
    const budgets=['Exploring budget','Under USD 500','USD 500-2000','USD 2000-10000','USD 10000+'];
-   if(!name||!company||!need||need.length<15||!email||! /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)||!budgets.includes(budget))return json({error:'Provide valid work contact details, workflow and budget band.'},400);
+   if(!name||!company||!need||need.length<15||!email||! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!budgets.includes(budget))return json({error:'Provide valid work contact details, workflow and budget band.'},400);
    const r=await fetch(BASE+'capture-lead',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name,email:email.toLowerCase(),company,need,budget}),signal:AbortSignal.timeout(15000)});
    const result=await r.json();
    return r.ok&&result.ok===true?json({ok:true}):json({error:'Could not save assessment request.'},502);
