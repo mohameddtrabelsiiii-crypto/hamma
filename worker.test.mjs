@@ -138,3 +138,46 @@ test('browser-only routing demo displays fictional sample messages and no extern
  const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
  assert.ok(sitemap.includes('<loc>https://taskforge-ai.pages.dev/automation/demo</loc>'));
 });
+
+test('functional LeadOps CSV pilot routes leads, marks duplicates and protects spreadsheet exports',async()=>{
+ const w=worker();
+ const resp=await w(new Request('https://taskforge.example/automation/leadops'));
+ assert.equal(resp.status,200);
+ assert.match(resp.headers.get('content-security-policy'),/connect-src 'none'/);
+ const html=await resp.text();
+ assert.match(html,/LeadOps CSV Pilot/);
+ assert.match(html,/No login, external API or paid software required/);
+ const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+ new vm.Script(script);
+ const elements={};
+ const el=(selector)=>elements[selector]??(elements[selector]={value:'',files:[],textContent:'',hidden:false,disabled:false,
+  addEventListener(){},replaceChildren(){},appendChild(){}});
+ const context={document:{querySelector:el}};
+ vm.runInNewContext(script+'\n;globalThis.leadops={parseCsv,analyzeCsv,exportCsv,classify,safeExportCell};',context);
+ const core=context.leadops;
+ const csv='name,email,company,message\r\nTaylor,TAYLOR@example.test,Acme,"We need a demo, and a quote."\r\nTaylor,taylor@example.test,Acme,"Send a quote."\r\nMorgan,morgan@example.test,Supply,"Please review our invoice and purchase order."\r\nAlex,alex@example.test,Other,"Hello"\r\n';
+ const result=core.analyzeCsv(csv);
+ assert.equal(result.records.length,4);
+ assert.equal(result.duplicates,1);
+ assert.equal(result.records[0].queue,'Sales / CRM');
+ assert.equal(result.records[2].queue,'Finance / operations');
+ assert.equal(result.records[3].queue,'Human triage');
+ assert.match(result.records[1].flags,/Possible duplicate/);
+ const exported=core.exportCsv(result);
+ assert.match(exported,/taskforge_review_flags/);
+ assert.equal(core.parseCsv(exported).rows.length,4);
+ const quoted=core.parseCsv('\uFEFFname,message\r\n"Jane","A quoted ""word"", then a\\nmultiline note"\r\n');
+ assert.equal(quoted.rows.length,1);
+ assert.equal(quoted.rows[0][1],'A quoted "word", then a\\nmultiline note');
+ assert.match(core.safeExportCell('=HYPERLINK("https://evil.test")'),/^"'=/);
+ assert.match(core.safeExportCell('  +1+1'),/^"'  \+1/);
+ assert.throws(()=>core.parseCsv('name,message\n"a","unclosed'),/Unclosed/);
+ assert.throws(()=>core.analyzeCsv('name,email\nTaylor,taylor@example.test'),/message, inquiry or notes/);
+ assert.throws(()=>core.parseCsv('name,message\nTaylor,"abc"def'),/Unexpected/);
+ assert.equal((await w(new Request('https://taskforge.example/automation/leadops',{method:'POST'}))).status,405);
+ assert.equal((await w(new Request('https://taskforge.example/automation/leadops',{method:'HEAD'}))).status,200);
+ const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ assert.ok(sitemap.includes('<loc>https://taskforge-ai.pages.dev/automation/leadops</loc>'));
+ const assessment=await (await w(new Request('https://taskforge.example/automation'))).text();
+ assert.match(assessment,/href="\/automation\/leadops"/);
+});
