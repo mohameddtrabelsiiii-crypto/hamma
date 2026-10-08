@@ -21,6 +21,14 @@ Acquire legitimate customer requests, qualify them, price fixed-scope work, deli
 - The Cloudflare Pages project cannot be switched from Direct Upload to Git. Creating a separate Git-connected project failed with error `8000011` (Cloudflare Git app installation); a corrected Git app installation or explicit deployment credentials are still required for continuous branded-domain sync.
 - A public smoke test is not a real paid-order test: verified account login, webhook settlement, real fulfillment and withdrawal remain unproven.
 
+## B2B workflow automation growth track (2026-10-08)
+- Three scoped **assessment/pilot offers**: lead intake & CRM routing, invoice/PO intake with exception review, and support inbox triage with human approvals.
+- Public **preview**: https://4fc1704b.taskforge-ai.pages.dev/automation. Its homepage links to the assessment, and the `/api/lead` proxy validates data and restricts origins. GitHub-hosted external HTTPS checks for the preview passed; see `.github/workflows/b2b-smoke.yml`.
+- Actual business inquiry capture uses the updated **ACTIVE** Supabase Edge Function `capture-lead` version 2 and the existing private RLS-protected `leads` table. The function bounds inputs, validates emails and budget categories, strips unrecognized data and refuses errors without leaking database details. No fake leads were created to test successful writes.
+- Go-to-market and delivery acceptance criteria are documented in `B2B_AUTOMATION_PLAYBOOK.md`.
+- **Important:** The branded production Cloudflare website still runs the preceding customer-tracking release, not the new B2B landing page. A Cloudflare production-upload call for this B2B upgrade was blocked by the connection's security controls; do not assert it was promoted. The preview remains shareable, but first customer-specific integration, data permissions, CRM writes and payment have **not** been validated.
+- These are invitations for a paid pilot proposal after feasibility review, **not** finished CRM, accounting or support software and not fixed-price instant checkout products. Confidential source documents, API keys and customer PII must not be submitted through the public assessment form.
+
 ## Customer checkout and delivery
 - Customers create an account using their project email and confirm that email.
 - The account section can open an approved quote's Whop checkout or download an approved result.
