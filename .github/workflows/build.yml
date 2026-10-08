@@ -15,6 +15,8 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: node scripts/build-pages.mjs
       - run: node --check dist/_worker.js
+      - run: node scripts/build-supabase-portal.mjs
+      - run: node --check dist/taskforge-public/index.mjs
       - run: node --test worker.test.mjs supabase/functions/*/*.test.mjs
       - run: npm run build
         env:
