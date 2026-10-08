@@ -22,8 +22,8 @@ test('CSV output quotes formula-looking values and embedded separators',()=>{
  const text=csvRows([['domain','notes'],['example.test','=HYPERLINK("https://bad.test")'],['mail.test','  +1+1'],['site.test','a,b']]);
  assert.match(text,/"'=HYPERLINK/);
  assert.match(text,/"'  \+1\+1"/);
- assert.deepEqual(parseCsv(text).rows[2],['mail.test',"'  +1+1"]);
- assert.deepEqual(parseCsv(text).rows[3],['site.test','a,b']);
+ assert.deepEqual(parseCsv(text).rows[1],['mail.test',"'  +1+1"]);
+ assert.deepEqual(parseCsv(text).rows[2],['site.test','a,b']);
 });
 test('aggregates across footprint queries, flags truncation, rejects malformed URLs',()=>{
  const plan=[
@@ -56,7 +56,7 @@ test('API implementation pages through results, never calls live provider in tes
  assert.equal(resp.results.length,1);
  assert.equal(requests.length,2);
  assert.equal(resp.truncated,false);
- assert.throws(()=>callPublicwww('',{key:'',perPage:100,maxPages:1}),/API key required/);
+ await assert.rejects(callPublicwww('',{key:'',perPage:100,maxPages:1}),/API key required/);
 });
 test('rate limit honours retry-after but quota exhaustion terminates without endless requests',async()=>{
  let calls=0,wait=0;
