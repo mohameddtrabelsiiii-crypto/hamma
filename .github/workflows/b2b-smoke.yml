@@ -51,3 +51,17 @@ jobs:
           test "$code" = "405"
           curl --fail --silent --show-error --max-time 25 "$base/sitemap.xml" -o /tmp/taskforge-new-sitemap.xml
           grep -Fq '<loc>https://taskforge-ai.pages.dev/automation/demo</loc>' /tmp/taskforge-new-sitemap.xml
+      - name: Check functional LeadOps CSV intake and export page
+        run: |
+          base="https://taskforge-b2b-preview.taskforge-ai.pages.dev"
+          curl --fail --silent --show-error --max-time 25 "$base/automation/leadops" -o /tmp/taskforge-leadops.html
+          grep -Fq "LeadOps CSV Pilot" /tmp/taskforge-leadops.html
+          grep -Fq "Analyze and route" /tmp/taskforge-leadops.html
+          grep -Fq "Export reviewed CSV" /tmp/taskforge-leadops.html
+          grep -Fq "Possible duplicate" /tmp/taskforge-leadops.html
+          grep -Fq "safeExportCell" /tmp/taskforge-leadops.html
+          if grep -qi "mohameddtrabelsiiii" /tmp/taskforge-leadops.html; then echo "Personal identifier exposed"; exit 1; fi
+          response=$(curl --silent --show-error --max-time 25 -o /tmp/leadops-denied -w '%{http_code}' -X POST "$base/automation/leadops")
+          test "$response" = "405"
+          curl --fail --silent --show-error --max-time 25 "$base/sitemap.xml" -o /tmp/taskforge-leadops-sitemap.xml
+          grep -Fq '<loc>https://taskforge-ai.pages.dev/automation/leadops</loc>' /tmp/taskforge-leadops-sitemap.xml
