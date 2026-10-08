@@ -65,3 +65,17 @@ jobs:
           test "$response" = "405"
           curl --fail --silent --show-error --max-time 25 "$base/sitemap.xml" -o /tmp/taskforge-leadops-sitemap.xml
           grep -Fq '<loc>https://taskforge-ai.pages.dev/automation/leadops</loc>' /tmp/taskforge-leadops-sitemap.xml
+      - name: Verify CRM dual-CSV review pilot
+        run: |
+          base="https://taskforge-b2b-preview.taskforge-ai.pages.dev"
+          curl --fail --silent --show-error --location --max-time 30 "$base/automation/crm-cleanup" -o /tmp/taskforge-crm-demo.html
+          grep -Fq "CRM List Cleanup Pilot" /tmp/taskforge-crm-demo.html
+          grep -Fq "Compare &amp; flag records" /tmp/taskforge-crm-demo.html
+          grep -Fq "Download exceptions only" /tmp/taskforge-crm-demo.html
+          grep -Fq "Shared address, distinct names" /tmp/taskforge-crm-demo.html
+          grep -Fq "connect-src 'none'" /tmp/taskforge-crm-demo.html || curl -sSI "$base/automation/crm-cleanup" | grep -Fq "connect-src 'none'"
+          if grep -qi "mohameddtrabelsiiii" /tmp/taskforge-crm-demo.html; then echo "Private identity leaked in public page"; exit 1; fi
+          code=$(curl --silent --show-error --max-time 25 -o /tmp/crm-reject -w '%{http_code}' -X POST "$base/automation/crm-cleanup")
+          test "$code" = "405"
+          curl --fail --silent --show-error --max-time 25 "$base/sitemap.xml" -o /tmp/crm-sitemap.xml
+          grep -Fq '<loc>https://taskforge-ai.pages.dev/automation/crm-cleanup</loc>' /tmp/crm-sitemap.xml
