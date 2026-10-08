@@ -47,6 +47,14 @@ Avoid collecting passwords, API keys, identifiable third-party client records, p
 `monthly_labor_capacity_hours = weekly_hours_saved * 4.33`.
 This measures capacity released, **not** automatic cash savings. Always disclose error review and ongoing subscription/support costs.
 
+## First sellable proof: LeadOps CSV pilot (2026-10-08)
+- Demo: **https://taskforge-b2b-preview.taskforge-ai.pages.dev/automation/leadops**.
+- Tested implementation: accepts CSV with a text inquiry column (maximum 2 MB, 2,000 data rows, 40 columns), suggests rules-based queue assignments, flags potential duplicate contacts or incomplete requests, and exports all rows as a quoted CSV for human review.
+- CSV exports protect leading formula-like spreadsheet values; no browser network requests are permitted by the page's `connect-src 'none'` policy. No client files go to our backend.
+- Unit tests validate quoted/newline CSV fields, malformed content rejection, duplicate flags, routing cases, and CSV formula protection. Production preview external HTTPS smoke tests verify the public page and guarded route.
+- This is **not generative AI and not a customer integration**; sell the *outcome* (fewer manual routing steps), then build integrations only with written scope, customer authorization and measured acceptance tests.
+- A first-revenue offer, qualification and personalized outreach plan lives at `sales/leadops-first-revenue-sprint.md`. Any numeric prices are internal hypotheses, not active public quotations or completed sales.
+
 ## Revenue path and guardrails
 1. First: prove that genuine business leads arrive and the intake writes only authorized data.
 2. Then: deliver one safe, paid, verifiable pilot and obtain permission for a case study.
