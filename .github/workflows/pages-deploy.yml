@@ -1,0 +1,53 @@
+name: Publish TaskForge Pages (credential-gated)
+on:
+  workflow_run:
+    workflows: ["Build TaskForge AI"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository
+      )
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Validate deployment credentials are available
+        id: credentials
+        shell: bash
+        run: |
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Cloudflare Pages Git deployment is not configured; connect a scoped API token and account ID in repository Settings. Existing production remains unchanged."
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Check out the verified main branch
+        if: steps.credentials.outputs.ready == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || 'main' }}
+          persist-credentials: false
+      - name: Set up Node
+        if: steps.credentials.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Regenerate Pages Worker from source
+        if: steps.credentials.outputs.ready == 'true'
+        run: |
+          node scripts/build-pages.mjs
+          node --check dist/_worker.js
+      - name: Deploy to the existing Cloudflare Pages project
+        if: steps.credentials.outputs.ready == 'true'
+        run: npx --yes wrangler@4 pages deploy dist --project-name taskforge-ai --branch main
