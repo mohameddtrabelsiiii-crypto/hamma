@@ -65,3 +65,46 @@ test('homepage provides tracking and service preselection without accepting paym
  assert.match(html,/searchParams.get\('service'\)/);
  assert.match(html,/Check project status/);
 });
+
+test('B2B automation proposal page is truthful, accessible and included in sitemap',async()=>{
+ const w=worker();
+ const r=await w(new Request('https://taskforge.example/automation'));
+ assert.equal(r.status,200);
+ const html=await r.text();
+ for(const phrase of ['B2B AI Workflow Automation','Lead intake &amp; CRM routing','Invoices &amp; order documents','Support inbox triage','Request a scoped pilot','id="b2b-lead"']){
+  assert.ok(html.includes(phrase),phrase);
+ }
+ const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+ new vm.Script(script);
+ assert.match(r.headers.get('content-security-policy'),/frame-ancestors 'none'/);
+ const home=await (await w(new Request('https://taskforge.example/'))).text();
+ assert.match(home,/href="\/automation"/);
+ const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ assert.match(sitemap,/https:\/\/taskforge-ai\.pages\.dev\/automation/);
+ assert.equal((await w(new Request('https://taskforge.example/automation',{method:'POST'}))).status,405);
+ assert.equal((await w(new Request('https://taskforge.example/automation',{method:'HEAD'}))).status,200);
+});
+test('B2B automation lead API validates input, strips unexpected fields and avoids leaking upstream data',async()=>{
+ const w=worker();
+ const good={name:'Jane Lead',email:'JANE@EXAMPLE.TEST',company:'Acme Operations',need:'We triage 500 inquiries weekly and need CRM routing.',budget:'USD 2000-10000',hack:'not allowed'};
+ assert.equal((await w(post('/api/lead',good,{origin:'https://attacker.test'}))).status,403);
+ assert.equal((await w(new Request('https://taskforge.example/api/lead'))).status,405);
+ assert.equal((await w(post('/api/lead',{...good,need:'x'}))).status,400);
+ assert.equal((await w(post('/api/lead',{...good,budget:'USD 0'}))).status,400);
+ let count=0;
+ const success=await worker(async(url,opts)=>{
+  count++;
+  assert.match(url,/capture-lead$/);
+  const payload=JSON.parse(opts.body);
+  assert.equal(payload.email,'jane@example.test');
+  assert.equal(payload.hack,undefined);
+  assert.equal(payload.company,'Acme Operations');
+  return Response.json({ok:true,raw_sensitive_data:'private'});
+ })(post('/api/lead',good));
+ assert.equal(success.status,200);
+ assert.deepEqual(await success.json(),{ok:true});
+ assert.equal(count,1);
+ const failed=await worker(async()=>Response.json({ok:false,error:'internal SQL details'},{status:502}))(post('/api/lead',good));
+ assert.equal(failed.status,502);
+ assert.ok(!JSON.stringify(await failed.json()).includes('SQL'));
+});
