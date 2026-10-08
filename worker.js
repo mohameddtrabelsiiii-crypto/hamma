@@ -22,7 +22,8 @@ const SERVICE_DETAILS={
     "note": "Qualifications and job history must come from your supplied information; nothing is invented."
   }
 };
-function serviceHtml(path,detail){\n const serviceSlug={'/services/pdf-to-excel':'pdf-to-excel','/services/spreadsheet-cleanup':'spreadsheet-cleanup','/services/company-list':'company-list','/services/cv-writing':'cv'}[path];
+function serviceHtml(path,detail){
+ const serviceSlug={'/services/pdf-to-excel':'pdf-to-excel','/services/spreadsheet-cleanup':'spreadsheet-cleanup','/services/company-list':'company-list','/services/cv-writing':'cv'}[path];
  const canonical='https://taskforge-ai.pages.dev'+path;
  return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
  '<title>'+detail.title+' | TaskForge AI</title><meta name="description" content="'+detail.description+'"><link rel="canonical" href="'+canonical+'">'+
