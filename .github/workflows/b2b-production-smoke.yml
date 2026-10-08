@@ -1,0 +1,35 @@
+name: Verify TaskForge B2B Production
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '17 7 * * *'
+permissions:
+  contents: read
+jobs:
+  verify-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check B2B public website and CRM demo
+        run: |
+          set -euo pipefail
+          base="https://taskforge-ai.pages.dev"
+          for route in automation automation/leadops automation/crm-cleanup; do
+            curl --fail --silent --show-error --location --max-time 25 "$base/$route" -o "/tmp/b2b-${route//\//-}.html"
+          done
+          grep -Fq "B2B AI Workflow Automation" /tmp/b2b-automation.html
+          grep -Fq "LeadOps CSV Pilot" /tmp/b2b-automation-leadops.html
+          grep -Fq "CRM List Cleanup Pilot" /tmp/b2b-automation-crm-cleanup.html
+          grep -Fq "Download exceptions only" /tmp/b2b-automation-crm-cleanup.html
+          if grep -q "mohameddtrabelsiiii" /tmp/b2b-automation-crm-cleanup.html; then echo "Personal identifier in public content"; exit 1; fi
+          curl --fail --silent --show-error --max-time 25 "$base/sitemap.xml" -o /tmp/b2b-prod-sitemap.xml
+          grep -Fq "<loc>$base/automation/crm-cleanup</loc>" /tmp/b2b-prod-sitemap.xml
+      - name: Verify invalid lead writes fail
+        run: |
+          set -euo pipefail
+          base="https://taskforge-ai.pages.dev"
+          status=$(curl --silent --show-error --max-time 25 -o /tmp/b2b-invalid.json -w '%{http_code}' -X POST -H 'Content-Type: application/json' -d '{"name":"Not Real","email":"invalid","company":"Fake","need":"x","budget":"unknown"}' "$base/api/lead")
+          test "$status" = 400
+          cross=$(curl --silent --show-error --max-time 25 -o /tmp/b2b-cross.json -w '%{http_code}' -X POST -H 'Content-Type: application/json' -H 'Origin: https://bad.invalid' -d '{"name":"Fake"}' "$base/api/lead")
+          test "$cross" = 403
