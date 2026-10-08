@@ -118,8 +118,8 @@ export function collectResults(plan,responses){
     for(const raw of page.results){
       const site=validSite(raw);
       if(!site){issues.push({query:item.query,warning:'Rejected unsafe/invalid API URL'});continue}
-      const current=found.get(site.domain)||{...site,locations:new Set(),footprints:new Set(),terms:new Set(),matches:0};
-      current.locations.add(item.town);current.footprints.add(item.footprint);current.terms.add(item.term);
+      const current=found.get(site.domain)||{...site,locations:new Set(),footprints:new Set(),terms:new Set(),queries:new Set(),matches:0};
+      current.locations.add(item.town);current.footprints.add(item.footprint);current.terms.add(item.term);current.queries.add(item.query);
       current.matches++;
       if(site.rank!==''&&(current.rank===''||site.rank<current.rank)){current.rank=site.rank;current.url=site.url}
       found.set(site.domain,current);
@@ -127,7 +127,7 @@ export function collectResults(plan,responses){
   }
   const data=[...found.values()].sort((a,b)=>a.domain.localeCompare(b.domain)).map(item=>({
     domain:item.domain,url:item.url,rank:item.rank,locations:[...item.locations].join(' | '),
-    footprints:[...item.footprints].join(' | '),terms:[...item.terms].join(' | '),
+    footprints:[...item.footprints].join(' | '),terms:[...item.terms].join(' | '),queries:[...item.queries].join(' | '),
     matches:item.matches,review_status:'Manual website verification required'
   }));
   return {data,issues};
@@ -201,13 +201,13 @@ export async function main(argv=process.argv.slice(2)){
       completed++;
     }catch(e){
       const {data,issues}=collectResults(capped.slice(0,completed),pages);
-      await writeFile(resolve(arg.output),csvRows([['domain','match_url','rank','matched_towns','matched_footprints','matched_terms','match_count','review_status'],...data.map(d=>[d.domain,d.url,d.rank,d.locations,d.footprints,d.terms,d.matches,d.review_status])]),'utf8');
+      await writeFile(resolve(arg.output),csvRows([['domain','match_url','rank','matched_towns','matched_footprints','matched_terms','matched_queries','match_count','review_status'],...data.map(d=>[d.domain,d.url,d.rank,d.locations,d.footprints,d.terms,d.queries,d.matches,d.review_status])]),'utf8');
       await writeFile(resolve(arg.output+'.report.json'),JSON.stringify({status:'partial_failure',completed,totalPlanned:plan.length,reason:String(e.message),issues,neverTreatAsComplete:true},null,2),'utf8');
       throw e;
     }
   }
   const {data,issues}=collectResults(capped,pages);
-  await writeFile(resolve(arg.output),csvRows([['domain','match_url','rank','matched_towns','matched_footprints','matched_terms','match_count','review_status'],...data.map(d=>[d.domain,d.url,d.rank,d.locations,d.footprints,d.terms,d.matches,d.review_status])]),'utf8');
+  await writeFile(resolve(arg.output),csvRows([['domain','match_url','rank','matched_towns','matched_footprints','matched_terms','matched_queries','match_count','review_status'],...data.map(d=>[d.domain,d.url,d.rank,d.locations,d.footprints,d.terms,d.queries,d.matches,d.review_status])]),'utf8');
   const incomplete=issues.length>0||capped.length!==plan.length;
   await writeFile(resolve(arg.output+'.report.json'),JSON.stringify({status:incomplete?'partial':'completed',queriesAttempted:completed,totalPossibleQueries:plan.length,uniqueDomains:data.length,issues,manualReviewRequired:true},null,2),'utf8');
   console.log('Finished '+completed+' authorized API queries and '+data.length+' unique domains. '+(incomplete?'PARTIAL: see report.':'See report.')+' Never assume results are manually verified.');
