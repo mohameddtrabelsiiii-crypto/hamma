@@ -108,3 +108,33 @@ test('B2B automation lead API validates input, strips unexpected fields and avoi
  assert.equal(failed.status,502);
  assert.ok(!JSON.stringify(await failed.json()).includes('SQL'));
 });
+
+test('browser-only routing demo displays fictional sample messages and no external network calls',async()=>{
+ const w=worker();
+ const response=await w(new Request('https://taskforge.example/automation/demo'));
+ assert.equal(response.status,200);
+ const html=await response.text();
+ assert.match(html,/Lead Routing Demonstration/);
+ assert.match(html,/fictional messages/);
+ assert.match(html,/id="sample"/);
+ assert.match(html,/id="message"/);
+ const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+ new vm.Script(script);
+ const elements={
+  '#sample':{value:'lead',addEventListener(){}},
+  '#message':{value:''},
+  '#result':{textContent:''},
+  '#route':{addEventListener(){}}
+ };
+ const ctx={document:{querySelector(selector){const el=elements[selector];if(!el)throw Error('Unknown control '+selector);return el;}}};
+ vm.runInNewContext(script+'\n;globalThis.demoRoute=route;',ctx);
+ assert.equal(ctx.demoRoute('I need a demo and quote for my team.').queue,'Sales / CRM review');
+ assert.equal(ctx.demoRoute('Dashboard is not working, I need support.').queue,'Support queue');
+ assert.equal(ctx.demoRoute('Please check our purchase order and invoice.').queue,'Operations / finance review');
+ assert.equal(ctx.demoRoute('Hello').queue,'Human triage');
+ assert.equal(ctx.demoRoute('We have a quote and invoice issue.').queue,'Human triage');
+ assert.match(response.headers.get('content-security-policy'),/connect-src 'none'/);
+ assert.equal((await w(new Request('https://taskforge.example/automation/demo',{method:'POST'}))).status,405);
+ const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ assert.ok(sitemap.includes('<loc>https://taskforge-ai.pages.dev/automation/demo</loc>'));
+});
