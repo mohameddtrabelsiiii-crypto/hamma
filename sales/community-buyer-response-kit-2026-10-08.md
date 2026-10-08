@@ -54,3 +54,11 @@
 
 ## Execution gate
 Replies and DMs require a connected, authorized forum account or user-operated forum UI. Current ChatGPT tools can read the posts but cannot publish Make/n8n community replies. **Publishing this file does not contact any buyer.** A platform-allowed reply should include one specific proof, one question about current availability, a narrow proposed deliverable, and no unapproved invented claims. Record evidence (sent permalink, buyer response, agreement, funded payment) before counting success.
+
+## Competition/recency validation (8 October 2026, later pass)
+- UK Drochaid AI white-label request now shows **45 forum replies** in the Make Hire Help category (thread original 5 Oct 2026). This is a genuine buyer request but now **high competition**, and requires 2–3 past Make workflows we cannot honestly provide. Downgrade to secondary; only propose a narrow paid API/CSV subtask if accepted.
+- Dorian56's workflow-repair thread shows **75 replies** (original 18 Sep 2026), so also downgrade for saturation; check whether the buyer remains active before answering.
+- Other Make 'senior' jobs demand advanced platform evidence which TaskForge has not yet demonstrated. Do not apply as a senior Make specialist.
+- Most recent category activity dates reflect replies, **not** when the buyer originally advertised work. Screen original post date and competition.
+- The `public.leads` table still had zero real entries; orders had zero confirmed payments on this check. This is discovery, not booked pipeline.
+- Priority now: find *fresh low-competition paid spreadsheet/API/data-validation requests* on eligible zero-cash marketplaces or open community posts; replies only from authenticated appropriate community accounts.
