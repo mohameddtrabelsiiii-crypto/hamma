@@ -18,6 +18,8 @@ jobs:
       - run: node scripts/build-supabase-portal.mjs
       - run: node --check dist/taskforge-public/index.mjs
       - run: node --test worker.test.mjs supabase/functions/*/*.test.mjs
+      - run: node --test tools/publicwww-export.test.mjs
+      - run: node tools/publicwww-export.mjs --locations tools/publicwww-locations.example.csv --out /tmp/taskforge-publicwww-dryrun
       - run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://epkhqmhhzwlbxxypywau.supabase.co
