@@ -67,3 +67,10 @@ Public website checkout remains closed for new automation pilots until real quot
 - 2026-10-08: B2B preview page and local demo live; external smoke tests pass. Public intake function is ACTIVE and database lead triage is implemented. Branded canonical production remains on a previous release because the B2B production promotion request was blocked by connector security.
 - Customer CRM integrations, automation agents, execution workflows and enterprise access control require implementation and customer-specific verification.
 - Never manufacture leads, clients, ROI figures, references or successful case studies.
+
+## CRM contact matching — verified free pilot (2026-10-08)
+- **Live:** https://taskforge-b2b-preview.taskforge-ai.pages.dev/automation/crm-cleanup
+- Compare a new contacts CSV to an existing CRM export without uploading files; flag exact email, phone or name-plus-address matches; protect distinct people who share a mailing address; export original records plus review reasons and an exceptions-only CSV.
+- The parser bounds two files to 2 MB, 3,000 rows each, 35 columns each, rejects invalid quoted CSV and guards formula-like fields in exports. Browser CSP blocks network connections for this page. Unit tests plus GitHub HTTPS smoke passed.
+- Not implemented: validated mailing-address correction, US phone number verification, fuzzy entity resolution, actual client CRM write-back, marketing emails, or real client delivery. These require a funded, scoped job and authorized source data.
+- This makes the earlier $100 CRM-import cleanup posting more technically feasible but **does not remove Upwork's 18-Connect application cost**, and no bid was sent. Buyers must approve ambiguous dedupe rules before imports.
