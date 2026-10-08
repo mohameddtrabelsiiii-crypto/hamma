@@ -32,7 +32,7 @@ Worcester,01905,"WR1|WR2"
 
 ## Example output columns
 
-`domain`, `match_url`, `rank`, `matched_towns`, `matched_footprints`, `matched_terms`, `match_count`, `review_status`.
+`domain`, `match_url`, `rank`, `matched_towns`, `matched_footprints`, `matched_terms`, `matched_queries`, `match_count`, `review_status`.
 
 The matched domain and URL come from the API. No records are invented when no key or API results exist.
 
