@@ -62,3 +62,10 @@ Acquire legitimate customer requests, qualify them, price fixed-scope work, deli
 
 ## Operating boundary
 Cavalry can build, deploy, validate and optimize infrastructure autonomously. It must not fabricate customers, payments or results, bypass verification, or spend money without authorization.
+
+## CRM contact matching — verified free pilot (2026-10-08)
+- **Live:** https://taskforge-b2b-preview.taskforge-ai.pages.dev/automation/crm-cleanup
+- Compare a new contacts CSV to an existing CRM export without uploading files; flag exact email, phone or name-plus-address matches; protect distinct people who share a mailing address; export original records plus review reasons and an exceptions-only CSV.
+- The parser bounds two files to 2 MB, 3,000 rows each, 35 columns each, rejects invalid quoted CSV and guards formula-like fields in exports. Browser CSP blocks network connections for this page. Unit tests plus GitHub HTTPS smoke passed.
+- Not implemented: validated mailing-address correction, US phone number verification, fuzzy entity resolution, actual client CRM write-back, marketing emails, or real client delivery. These require a funded, scoped job and authorized source data.
+- This makes the earlier $100 CRM-import cleanup posting more technically feasible but **does not remove Upwork's 18-Connect application cost**, and no bid was sent. Buyers must approve ambiguous dedupe rules before imports.
