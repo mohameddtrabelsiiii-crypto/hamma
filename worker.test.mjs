@@ -181,3 +181,17 @@ test('functional LeadOps CSV pilot routes leads, marks duplicates and protects s
  const assessment=await (await w(new Request('https://taskforge.example/automation'))).text();
  assert.match(assessment,/href="\/automation\/leadops"/);
 });
+
+
+test('serves IndexNow ownership proof only to safe read methods',async()=>{
+ const w=worker();
+ const path='/7d2669768911ab1286b83b5b8c732b7b.txt';
+ const get=await w(new Request('https://taskforge.example'+path));
+ assert.equal(get.status,200);
+ assert.equal(await get.text(),'7d2669768911ab1286b83b5b8c732b7b');
+ assert.match(get.headers.get('content-type'),/text\/plain/);
+ const head=await w(new Request('https://taskforge.example'+path,{method:'HEAD'}));
+ assert.equal(head.status,200);
+ assert.equal(await head.text(),'');
+ assert.equal((await w(new Request('https://taskforge.example'+path,{method:'POST'}))).status,405);
+});
