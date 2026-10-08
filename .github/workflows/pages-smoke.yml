@@ -44,3 +44,13 @@ jobs:
             curl --fail --silent --show-error --location --retry 3 --max-time 20 "https://taskforge-ai.pages.dev/services/${path}" -o "/tmp/taskforge-service-${path}.html"
             grep -Fq "href=\"https://taskforge-ai.pages.dev/services/${path}\"" "/tmp/taskforge-service-${path}.html"
           done
+
+      - name: Verify live quick CSV buyer quote funnel
+        run: |
+          curl --fail --silent --show-error --location --retry 3 --max-time 20 https://taskforge-ai.pages.dev/services/quick-csv-fix -o /tmp/taskforge-quick-csv.html
+          grep -Fq 'id="csv-quote"' /tmp/taskforge-quick-csv.html
+          grep -Fq 'Request a free scope review' /tmp/taskforge-quick-csv.html
+          grep -Fq "fetch('/api/lead'" /tmp/taskforge-quick-csv.html
+          grep -Fq '<loc>https://taskforge-ai.pages.dev/services/quick-csv-fix</loc>' /tmp/taskforge-sitemap.xml
+          code=$(curl --silent --show-error --max-time 20 -o /tmp/taskforge-invalid-lead.json -w "%{http_code}" -H "Content-Type: application/json" -d '{}' https://taskforge-ai.pages.dev/api/lead)
+          test "$code" = "400"
