@@ -21,5 +21,5 @@ script += [
 ].join('\n');
 const out=new URL('../dist/taskforge-public/',import.meta.url);
 await mkdir(out,{recursive:true});
-await writeFile(new URL('index.ts',out),script,'utf8');
+await writeFile(new URL('index.mjs',out),script,'utf8');
 console.log('Generated isolated Supabase portal from the production Worker source.');
