@@ -11,6 +11,14 @@ Acquire legitimate customer requests, qualify them, price fixed-scope work, deli
 - Database: Supabase with RLS enabled on operational tables.
 - No paid infrastructure was added.
 
+## Customer status tracking — built and backend deployed (2026-10-08)
+- `order-status` Supabase Edge Function is ACTIVE with gateway JWT verification enabled.
+- Authenticated, email-confirmed customers can check their own TF reference without exposing other customers' projects, files or payment identifiers.
+- The response distinguishes quote review, priced-but-unpaid, payment recorded, processing, quality review, checked delivery, and rejection. A downloadable state requires payment confirmation and checked results.
+- Source: `supabase/functions/order-status/`; tests run with `node --test supabase/functions/order-status/*.test.mjs`.
+- The homepage's **Check project status** button and service-specific landing page links are coded in `worker.js`. The GitHub build passes, but this Worker change is **NOT live**: Cloudflare Pages still uses the earlier Direct Upload deployment. A Cloudflare deployment request in this session was blocked by tooling, so no claim of a website rollout is made.
+- Do not send new status-link announcements to customers until the latest Worker is successfully deployed and the live authenticated flow has been exercised.
+
 ## Customer checkout and delivery
 - Customers create an account using their project email and confirm that email.
 - The account section can open an approved quote's Whop checkout or download an approved result.
