@@ -27,6 +27,14 @@ A qualified opportunity identifies:
 
 Avoid collecting passwords, API keys, identifiable third-party client records, protected health data, bank records or other confidential raw documents in the public lead form.
 
+## Operating lead triage (implemented in Supabase)
+- The database migration `supabase/migrations/20261008013900_b2b_lead_qualification.sql` runs an INSERT trigger when `source='website-b2b-automation'`.
+- It stores `workflow_category` (sales/CRM, invoices/PO, support inbox, other), `qualification_score` (0–100), `review_priority`, `triage_state='awaiting_human_review'`, and `review_due_at`.
+- The score measures **completeness of the self-reported brief**, not likelihood of purchase, legitimacy, lead value, accuracy or creditworthiness. Higher-scoring inquiries are placed earlier in the review queue. No messages are sent, customer systems accessed or payments initiated.
+- Internal review queue SQL: `ops/b2b-review-queue.sql` (authorized Supabase operator only). Never publish the output, which includes submitted names, companies and contact details.
+- The migration was tested with high/low informational sample transactions and **ROLLBACK**. No test leads were retained. Existing RLS access stayed unchanged.
+- A separate public, browser-only routing demonstration is at `https://taskforge-b2b-preview.taskforge-ai.pages.dev/automation/demo`. It uses fictional text and deterministic keyword rules; it is not an AI model or live customer integration.
+
 ## Proposal outline
 - **Discovery:** map the as-is workflow and integration permissions.
 - **Pilot scope:** one trigger, a few transformations, one destination and a manual exception queue.
@@ -48,6 +56,6 @@ This measures capacity released, **not** automatic cash savings. Always disclose
 Public website checkout remains closed for new automation pilots until real quote, service fulfillment and merchant payment integration are reviewed. Do not reuse the consumer PDF/CSV order checkout as an automatic B2B payment system.
 
 ## Honest operating status
-- 2026-10-08: marketing and qualification funnel built in source; production release to be verified separately.
+- 2026-10-08: B2B preview page and local demo live; external smoke tests pass. Public intake function is ACTIVE and database lead triage is implemented. Branded canonical production remains on a previous release because the B2B production promotion request was blocked by connector security.
 - Customer CRM integrations, automation agents, execution workflows and enterprise access control require implementation and customer-specific verification.
 - Never manufacture leads, clients, ROI figures, references or successful case studies.
