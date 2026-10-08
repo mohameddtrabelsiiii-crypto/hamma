@@ -285,3 +285,26 @@ test('free page analytics are restricted to marketing pages, not local-only demo
   assert.match(response.headers.get('content-security-policy'),/connect-src 'none'/);
  }
 });
+
+
+test('quick CSV quote landing captures buyer requests using existing validated lead route',async()=>{
+ const w=worker();
+ const response=await w(new Request('https://taskforge.example/services/quick-csv-fix'));
+ assert.equal(response.status,200);
+ const html=await response.text();
+ assert.match(html,/id="csv-quote"/);
+ assert.match(html,/Request a free scope review/);
+ assert.match(html,/No account, payment or file upload/);
+ assert.match(html,/budget:'Exploring budget'/);
+ assert.match(html,/fetch\('\/api\/lead'/);
+ assert.match(response.headers.get('content-security-policy'),/connect-src 'self'/);
+ assert.match(response.headers.get('content-security-policy'),/form-action 'self'/);
+ const script=html.match(/<script>([\s\S]*?)<\/script>/);
+ assert.ok(script);
+ new vm.Script(script[1]);
+ const legacy=await w(new Request('https://taskforge.example/services/pdf-to-excel'));
+ assert.equal(legacy.status,200);
+ assert.doesNotMatch(await legacy.text(),/id="csv-quote"/);
+ assert.match(legacy.headers.get('content-security-policy'),/form-action 'none'/);
+ assert.equal((await w(new Request('https://taskforge.example/services/quick-csv-fix',{method:'POST'}))).status,405);
+});
