@@ -43,6 +43,10 @@ function json(value,status=200){return new Response(JSON.stringify(value),{statu
 async function handle(request){
  const url=new URL(request.url);
  const publicHeaders={'x-content-type-options':'nosniff','cache-control':'public, max-age=3600'};
+ if(url.pathname==='/7d2669768911ab1286b83b5b8c732b7b.txt'){
+  if(request.method!=='GET'&&request.method!=='HEAD')return new Response('Method not allowed',{status:405});
+  return new Response(request.method==='HEAD'?null:'7d2669768911ab1286b83b5b8c732b7b',{headers:{...publicHeaders,'content-type':'text/plain; charset=utf-8'}});
+ }
  if(url.pathname==='/robots.txt'||url.pathname==='/sitemap.xml'){
   if(request.method!=='GET'&&request.method!=='HEAD')return new Response('Method not allowed',{status:405});
   const robots=url.pathname==='/robots.txt';
