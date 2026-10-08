@@ -16,8 +16,8 @@ Acquire legitimate customer requests, qualify them, price fixed-scope work, deli
 - Source of truth: `worker.js`. Reproducible build: `node scripts/build-supabase-portal.mjs` -> `dist/taskforge-public/index.mjs`; deployment: Supabase Edge Function `taskforge-public`, `verify_jwt=false` for the public HTML and guarded router only.
 - The private `order-status` function has `verify_jwt=true` and checks the JWT, verified customer email and matching order ownership before returning minimal status fields.
 - Live public smoke tests are at `.github/workflows/portal-smoke.yml`. GitHub-hosted external HTTPS requests successfully checked the homepage, spreadsheet service landing page, anonymous status refusal, invalid order refusal and anonymous checkout refusal.
-- The primary https://taskforge-ai.pages.dev/ is **still on an older Direct Upload build** and does not include the new tracking interface. Do not call it synchronized.
-- A GitHub Actions direct-upload workflow exists at `.github/workflows/pages-deploy.yml` and validates a successful build, but the actual deploy step **skips** until a scoped `CLOUDFLARE_API_TOKEN` secret and `CLOUDFLARE_ACCOUNT_ID` variable are provided in GitHub. A green skipped job is not a deployment.
+- The primary **https://taskforge-ai.pages.dev/** was updated by a credential-free direct Cloudflare Pages upload on 2026-10-08. The canonical production deployment `0b86f5c5-faf5-47f9-bf35-545dc3022179` succeeded for commit `1953bd398fc982c0c94dc58340cdbbd3e3e67d7b`; GitHub-hosted production HTTPS smoke tests pass including project tracking, checkout and downloads blocking anonymous callers.
+- GitHub Actions continuous automatic Direct Upload is **still gated**: `.github/workflows/pages-deploy.yml` skips the upload unless a scoped `CLOUDFLARE_API_TOKEN` repository secret and `CLOUDFLARE_ACCOUNT_ID` repository variable are configured. A green skipped job is not a deployment. This does **not** prevent verified releases through the authenticated Cloudflare connection.
 - The Cloudflare Pages project cannot be switched from Direct Upload to Git. Creating a separate Git-connected project failed with error `8000011` (Cloudflare Git app installation); a corrected Git app installation or explicit deployment credentials are still required for continuous branded-domain sync.
 - A public smoke test is not a real paid-order test: verified account login, webhook settlement, real fulfillment and withdrawal remain unproven.
 
@@ -37,7 +37,7 @@ Acquire legitimate customer requests, qualify them, price fixed-scope work, deli
 - `node scripts/build-pages.mjs` creates `dist/_worker.js` from the same source as the existing Worker.
 - Cloudflare Pages `taskforge-ai` currently uses Direct Upload.
 - Cloudflare's Git connection API returns installation error `8000011`; repair/reinstall the Cloudflare GitHub app before enabling automatic Git deploys.
-- Until then, deploy future Pages changes directly; a GitHub push alone does not update the Pages site.
+- Until automated GitHub credentials are configured, deploy future Pages changes via the authenticated Cloudflare connection after the GitHub build and tests succeed; a GitHub push alone does not update the Pages site. Automated daily verification of the live site continues.
 
 ## Current service catalog
 - PDF to Excel
