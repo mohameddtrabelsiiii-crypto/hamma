@@ -33,3 +33,12 @@ Updated 2026-10-08. Source URLs and budgets are buyer-advertised. **Not contract
 
 ## Weekly success metrics
 Track: verified submissions, buyer replies, discovery calls, funded projects, accepted deliveries, settled receipts, fees and realized net profit. Don't treat a draft bid or public job ad as a customer.
+
+## Official Upwork account verification — 8 Oct 2026
+- The official Upwork connector is **connected** as a Freelancer account. Upwork reports **0 Connects** total (0 free, 0 paid, 0 rollover). No earning-Connects onboarding tasks are currently shown on the freelancer profile.
+- PublicWWW project: **ACTIVE**, application not submitted, **18 Connects** required; Upwork reports `can_apply=false` because the account does not have enough Connects. This client has made 1 offer and 0 hires for the posting at the time of the check.
+- Inventory architecture project: **ACTIVE**, application not submitted, **11 Connects** required, `can_apply=false`; screening questions require a truthful comparable project history and genuine personal availability.
+- Upwork reports **0 received invitations** and **0 previously submitted proposals**. No Connects were purchased or used.
+- A proposal-preview request surfaced Upwork's disintermediation acknowledgment prompt. The account holder must explicitly acknowledge Upwork's policy to receive all marketplace contract payments through Upwork before that acknowledgment can be recorded. Never acknowledge automatically.
+- Zero-Connects fallback: prepare an inbound **Project Catalog** service using `sales/upwork-project-catalog-no-connects-draft-2026-10-08.md` with prices $89/$249/$399 and a browser-only fictional demo. Publishing needs Upwork's native UI, review and approval; no ChatGPT connector action currently exposes creation or publication.
+- The Upwork freelancer profile currently does not advertise TaskForge's actual CSV/API strengths prominently and has no portfolio projects. Propose a truthful headline and portfolio after explicit account-holder authorization, not a silent overwrite.
