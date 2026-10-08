@@ -206,3 +206,64 @@ test('CRM landing route is shown and indexed',async()=>{
  const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
  assert.ok(sitemap.includes('/services/crm-csv-cleanup'));
 });
+
+test('CRM contact cleanup compares two sources without merging shared-household contacts',async()=>{
+ const w=worker();
+ const response=await w(new Request('https://taskforge.example/automation/crm-cleanup'));
+ assert.equal(response.status,200);
+ const html=await response.text();
+ assert.match(html,/CRM List Cleanup Pilot/);
+ assert.match(html,/without uploading either file/);
+ assert.match(html,/Distinct people at one address/);
+ assert.match(response.headers.get('content-security-policy'),/connect-src 'none'/);
+ const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+ new vm.Script(script);
+ const els=new Map();
+ function node(k){
+  if(!els.has(k))els.set(k,{value:'',textContent:'',files:[],hidden:true,
+   addEventListener(){},replaceChildren(){},appendChild(){},click(){},remove(){}});
+  return els.get(k);
+ }
+ const ctx={document:{querySelector:node}};
+ vm.runInNewContext(script+'\n;globalThis.crm={parseCsv,compare,buildExport,guardCell,EXAMPLE_NEW,EXAMPLE_CRM};',ctx);
+ const data=ctx.crm.compare(ctx.crm.EXAMPLE_NEW,ctx.crm.EXAMPLE_CRM);
+ assert.equal(data.evaluated.length,5);
+ assert.equal(data.crm.rows.length,2);
+ assert.equal(data.possibleDuplicates,2);
+ assert.equal(data.evaluated[0].status,'POSSIBLE_DUPLICATE');
+ assert.equal(data.evaluated[1].status,'SHARED_ADDRESS_REVIEW');
+ assert.match(data.evaluated[1].reason,/Shared address, distinct names/);
+ assert.equal(data.evaluated[2].status,'SHARED_ADDRESS_REVIEW');
+ assert.equal(data.evaluated[3].status,'POSSIBLE_DUPLICATE');
+ assert.ok(data.exceptions>=4);
+ assert.match(data.evaluated[4].reason,/Missing name/);
+ const all=ctx.crm.parseCsv(ctx.crm.buildExport(data));
+ const only=ctx.crm.parseCsv(ctx.crm.buildExport(data,true));
+ assert.equal(all.rows.length,5);
+ assert.equal(only.rows.length,data.exceptions);
+ const title=await (await w(new Request('https://taskforge.example/automation'))).text();
+ assert.match(title,/href="\/automation\/crm-cleanup"/);
+ const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ assert.match(sitemap,/automation\/crm-cleanup/);
+ assert.equal((await w(new Request('https://taskforge.example/automation/crm-cleanup',{method:'POST'}))).status,405);
+ assert.equal((await w(new Request('https://taskforge.example/automation/crm-cleanup',{method:'HEAD'}))).status,200);
+});
+test('CRM cleanup safely handles quoted CSV, formula injection, missing IDs and invalid rows',async()=>{
+ const html=await (await worker()(new Request('https://taskforge.example/automation/crm-cleanup'))).text();
+ const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+ const doc={querySelector:()=>({files:[],value:'',addEventListener(){},replaceChildren(){}})};
+ const ctx={document:doc};
+ vm.runInNewContext(script+'\n;globalThis.crm={parseCsv,compare,buildExport,guardCell};',ctx);
+ const csv='name,email,address\n"Taylor, A",T@EXAMPLE.TEST,"1 Main St"\n';
+ assert.equal(ctx.crm.parseCsv(csv).rows[0][0],'Taylor, A');
+ const result=ctx.crm.compare(csv,'name,email,address\nTaylor A,t@example.test,1 Main Street\n');
+ assert.equal(result.evaluated[0].status,'POSSIBLE_DUPLICATE');
+ const withFormula=ctx.crm.compare('name,email,address\n"=HYPERLINK(""https://bad.example"")",test@example.test,1 Main St\n','name,email,address\nOther,other@example.test,44 New St\n');
+ assert.match(ctx.crm.buildExport(withFormula),/"'=HYPERLINK/);
+ assert.equal(ctx.crm.parseCsv(ctx.crm.buildExport(withFormula)).rows.length,1);
+ assert.throws(()=>ctx.crm.parseCsv('name,email\n"unclosed,x'),/Unclosed/);
+ assert.throws(()=>ctx.crm.parseCsv('name,email\n"a"junk,b'),/Unexpected/);
+ assert.throws(()=>ctx.crm.parseCsv('name,name\nA,B'),/unique/);
+ assert.throws(()=>ctx.crm.parseCsv('name,email\nA,B,C'),/inconsistent/);
+ assert.throws(()=>ctx.crm.compare('name,email\n','name,email\nOld,a@example.test\n'),/at least one contact/);
+});
