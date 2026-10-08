@@ -13,7 +13,10 @@ script += [
 "const PUBLIC_PREFIX='"+prefix+"';",
 'Deno.serve(request=>{',
 ' const url=new URL(request.url);',
-' const path=(url.pathname===PUBLIC_PREFIX||url.pathname.startsWith(PUBLIC_PREFIX+"/")) ? (url.pathname.slice(PUBLIC_PREFIX.length)||"/") : url.pathname;',
+' let path=url.pathname;',
+' for(const prefix of [PUBLIC_PREFIX,"/taskforge-public","/_functions/taskforge-public"]){',
+'  if(path===prefix||path.startsWith(prefix+"/")){path=path.slice(prefix.length)||"/";break;}',
+' }',
 ' url.pathname=path;',
 ' return handle(new Request(url,request));',
 '});',''
