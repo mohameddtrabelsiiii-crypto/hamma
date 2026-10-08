@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Check public automation offer page
         run: |
-          base="https://4fc1704b.taskforge-ai.pages.dev"
+          base="https://taskforge-b2b-preview.taskforge-ai.pages.dev"
           curl --fail --silent --show-error --location --retry 3 --max-time 25 "$base/automation" -o /tmp/taskforge-b2b.html
           grep -Fq "B2B AI Workflow Automation" /tmp/taskforge-b2b.html
           grep -Fq 'id="b2b-lead"' /tmp/taskforge-b2b.html
@@ -25,14 +25,14 @@ jobs:
           if grep -qi "mohameddtrabelsiiii" /tmp/taskforge-b2b.html; then echo "Identifying details leaked"; exit 1; fi
       - name: Check branded homepage B2B path
         run: |
-          base="https://4fc1704b.taskforge-ai.pages.dev"
+          base="https://taskforge-b2b-preview.taskforge-ai.pages.dev"
           curl --fail --silent --show-error --location --max-time 25 "$base/" -o /tmp/taskforge-b2b-home.html
           grep -Fq 'href="/automation"' /tmp/taskforge-b2b-home.html
           curl --fail --silent --show-error --location --max-time 25 "$base/sitemap.xml" -o /tmp/taskforge-b2b-sitemap.xml
           grep -Fq '<loc>https://taskforge-ai.pages.dev/automation</loc>' /tmp/taskforge-b2b-sitemap.xml
       - name: Check B2B lead API validates data and origin
         run: |
-          base="https://4fc1704b.taskforge-ai.pages.dev"
+          base="https://taskforge-b2b-preview.taskforge-ai.pages.dev"
           invalid='{"name":"Test","email":"not-an-email","company":"Test","need":"x","budget":"USD 2000-10000"}'
           response=$(curl --silent --show-error --max-time 25 -o /tmp/b2b-invalid.json -w '%{http_code}' -H 'Content-Type: application/json' -d "$invalid" "$base/api/lead")
           test "$response" = "400"
@@ -40,3 +40,14 @@ jobs:
           test "$response" = "403"
           response=$(curl --silent --show-error --max-time 25 -o /tmp/b2b-get.json -w '%{http_code}' "$base/api/lead")
           test "$response" = "405"
+      - name: Verify browser-only lead routing demonstration
+        run: |
+          base="https://taskforge-b2b-preview.taskforge-ai.pages.dev"
+          curl --fail --silent --show-error --max-time 25 "$base/automation/demo" -o /tmp/taskforge-demo.html
+          grep -Fq "Lead Routing Demonstration" /tmp/taskforge-demo.html
+          grep -Fq "All processing stays in your browser" /tmp/taskforge-demo.html
+          grep -Fq "Operations / finance review" /tmp/taskforge-demo.html
+          code=$(curl --silent --show-error --max-time 25 -o /tmp/taskforge-demo-rejected -w '%{http_code}' -X POST "$base/automation/demo")
+          test "$code" = "405"
+          curl --fail --silent --show-error --max-time 25 "$base/sitemap.xml" -o /tmp/taskforge-new-sitemap.xml
+          grep -Fq '<loc>https://taskforge-ai.pages.dev/automation/demo</loc>' /tmp/taskforge-new-sitemap.xml
