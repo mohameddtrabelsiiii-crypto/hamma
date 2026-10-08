@@ -40,6 +40,7 @@ test('aggregates across footprint queries, flags truncation, rejects malformed U
  assert.equal(result.data[0].rank,105);
  assert.deepEqual(result.data[0].locations,'Shrewsbury | York');
  assert.equal(result.data[0].matches,2);
+ assert.equal(result.data[0].queries,'a | b');
  assert.equal(result.data[0].review_status,'Manual website verification required');
  assert.equal(result.issues.length,2);
 });
