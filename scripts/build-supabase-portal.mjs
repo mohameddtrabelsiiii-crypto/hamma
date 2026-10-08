@@ -13,8 +13,7 @@ script += [
 "const PUBLIC_PREFIX='"+prefix+"';",
 'Deno.serve(request=>{',
 ' const url=new URL(request.url);',
-' if(!(url.pathname===PUBLIC_PREFIX||url.pathname.startsWith(PUBLIC_PREFIX+"/")))return new Response("Not found",{status:404});',
-' const path=url.pathname.slice(PUBLIC_PREFIX.length)||"/";',
+' const path=(url.pathname===PUBLIC_PREFIX||url.pathname.startsWith(PUBLIC_PREFIX+"/")) ? (url.pathname.slice(PUBLIC_PREFIX.length)||"/") : url.pathname;',
 ' url.pathname=path;',
 ' return handle(new Request(url,request));',
 '});',''
