@@ -236,7 +236,7 @@ test('CRM contact cleanup compares two sources without merging shared-household 
  assert.equal(data.evaluated[2].status,'SHARED_ADDRESS_REVIEW');
  assert.equal(data.evaluated[3].status,'POSSIBLE_DUPLICATE');
  assert.ok(data.exceptions>=4);
- assert.match(data.evaluated[4].reason,/Missing name/);
+ assert.match(data.evaluated[4].reason,/Missing email and phone/);
  const all=ctx.crm.parseCsv(ctx.crm.buildExport(data));
  const only=ctx.crm.parseCsv(ctx.crm.buildExport(data,true));
  assert.equal(all.rows.length,5);
