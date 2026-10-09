@@ -32,6 +32,7 @@ class CommerceTests(unittest.TestCase):
             self.assertEqual(out,[("Cavalry","atlas",0),("atlas","muse",0),("atlas","Cavalry",0)])
             self.assertEqual(r["external_actions"],0)
             self.assertEqual(r["spend_usd"],0)
+            conn.close()
 
     def test_fail_closed_on_inference_problem(self):
         def dead(req,timeout): raise ConnectionError("offline")
