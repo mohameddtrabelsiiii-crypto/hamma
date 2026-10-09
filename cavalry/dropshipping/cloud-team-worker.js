@@ -14,7 +14,7 @@ const TEAM = [
 ];
 const MODEL="@cf/meta/llama-3.1-8b-instruct-fp8";
 const SHOP="Med Art";
-const BASELINE="Verified on October 9, 2026 via authenticated Fourthwall MCP: Med Art COMING_SOON, one HIDDEN Fourthwall-fulfilled Orbit Notes minimal art sticker at $6.29, one HIDDEN Original Abstract Art Gifts collection, payout INACTIVE. Price is not proof of positive net profit. This is a dated audit, not continuously authenticated cloud access.";
+const BASELINE="Verified on October 9, 2026 via authenticated Fourthwall MCP: Med Art COMING_SOON, three HIDDEN Fourthwall-fulfilled print-on-demand products (Orbit Notes sticker $6.29, Contour Flow tee $22.75, Night Geometry mug $16.95) in one HIDDEN Original Abstract Art Gifts collection, payout INACTIVE. Price is not proof of positive net profit. This is a dated audit, not continuously authenticated cloud access.";
 const json=(obj,status=200)=>new Response(JSON.stringify(obj),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const cap=s=>String(s||"").replace(/(?:Bearer\s+)[A-Za-z0-9._~+/-]+/gi,"Bearer [redacted]").slice(0,1400);
 async function cycle(env) {
@@ -70,12 +70,13 @@ export default {
       const n=await env.DB.prepare("SELECT COUNT(*) AS total FROM cycles").first();
       const last=await env.DB.prepare("SELECT ts,actor,status FROM cycles ORDER BY id DESC LIMIT 1").first();
       const msgs=await env.DB.prepare("SELECT COUNT(*) AS total FROM messages").first();
+      const handoffs=await env.DB.prepare("SELECT COUNT(*) AS total FROM messages WHERE kind='handoff_draft'").first();
       const count=n?.total||0;
       return json({system:"Cavalry Med Art AI Team",mode:"cloud_prelaunch_draft_only",leader:"Cavalry",specialists:TEAM.map(a=>a[0]),
-        total_cycles:count,total_handoffs:msgs?.total||0,last_cycle:last||null,next_role:TEAM[count%TEAM.length][0],
+        total_cycles:count,total_messages:msgs?.total||0,total_handoffs:handoffs?.total||0,last_cycle:last||null,next_role:TEAM[count%TEAM.length][0],
         independent_pc:true,merchant_live:false,ai_model:MODEL,external_store_writes:false,
         zero_spend_target:true,free_quota_budget_max_cycles_per_utc_day:8,
-        payout_last_verified:"INACTIVE (2026-10-09)",store_last_verified:"COMING_SOON, 1 hidden POD sticker and 1 hidden collection (2026-10-09)"});
+        payout_last_verified:"INACTIVE (2026-10-09)",store_last_verified:"COMING_SOON, 3 hidden POD items in one hidden collection (2026-10-09)"});
     } catch (e) {return json({service:"Cavalry",status:"db_unavailable"},503);}
   }
 };
