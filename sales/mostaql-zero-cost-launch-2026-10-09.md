@@ -84,3 +84,9 @@ These are *demonstration works*, not prior paid-client projects. Capture screens
 - **No expense:** zero upfront cash, no paid account upgrades.
 - **Owner-required steps:** real signup and platform identity verification, three honest portfolio entries, and marketplace-specific bidding approval if terms prompt. Do not bypass.
 - **Track application stage as:** discovered -> account eligible -> bid submitted -> buyer reply -> funded project -> verified delivery -> payment actually released.
+
+## Additional verified portfolio proof — Excel consolidation sample (9 October)
+- A real demo workbook `TaskForge_Excel_Consolidation_Portfolio_Demo.xlsx` was created as a ChatGPT conversation attachment; it is **not hosted by this repository**. Fictional records only.
+- The workbook merges 12 fictional records from three simulated workbook sources and includes a source audit, formula-based quality flags and an exceptions review queue. The resulting QA summary showed 3 review cases (2 duplicate-like IDs and 1 missing ID), with audit result MATCH.
+- Full truthful Arabic description: `sales/mostaql-consolidation-sample-2026-10-09.md`.
+- This proves a sample workbook design, **not** automated processing of 87 true Excel files. For the buyer, propose source inspection and mapping rules before confirming delivery.
