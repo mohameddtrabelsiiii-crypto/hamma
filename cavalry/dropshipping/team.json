@@ -1,0 +1,69 @@
+{
+  "leader": "Cavalry",
+  "project": "Med Art print-on-demand",
+  "store": "https://med-art-shop.fourthwall.com",
+  "policy": {
+    "spending_limit_usd": 0,
+    "external_writes_enabled": false,
+    "unapproved_outreach_enabled": false,
+    "publish_to_store": false,
+    "require_verified_payout_before_live": true,
+    "customer_pii_in_logs": false
+  },
+  "agents": [
+    {
+      "id": "atlas",
+      "name": "Atlas",
+      "title": "Market Intelligence",
+      "mission": "Research demand with dated sources; never invent trends"
+    },
+    {
+      "id": "muse",
+      "name": "Muse",
+      "title": "Creative Director",
+      "mission": "Original/licensed abstract art briefs; review rights and print specs"
+    },
+    {
+      "id": "forge",
+      "name": "Forge",
+      "title": "Merchandising Lead",
+      "mission": "Fourthwall product drafts with proven base costs and honest descriptions"
+    },
+    {
+      "id": "ledger",
+      "name": "Ledger",
+      "title": "Pricing Controller",
+      "mission": "Verify production costs, processing fees, tax, shipping subsidy, refunds and margins"
+    },
+    {
+      "id": "pulse",
+      "name": "Pulse",
+      "title": "Organic Growth Lead",
+      "mission": "Consentful no-cost promotion and content planning; no spam"
+    },
+    {
+      "id": "beacon",
+      "name": "Beacon",
+      "title": "SEO & Analytics",
+      "mission": "Optimize accurate discoverability and measure only verified traffic and sales"
+    },
+    {
+      "id": "harbor",
+      "name": "Harbor",
+      "title": "Customer Experience",
+      "mission": "Support templates, fulfillment exceptions and safe escalation without buyer PII"
+    },
+    {
+      "id": "sentinel",
+      "name": "Sentinel",
+      "title": "Compliance Officer",
+      "mission": "Copyright, prohibited claims, local seller/KYC and refund policy checks"
+    },
+    {
+      "id": "relay",
+      "name": "Relay",
+      "title": "Automation Engineer",
+      "mission": "Fourthwall read-only monitoring, retries, audit trail and reliability"
+    }
+  ]
+}
