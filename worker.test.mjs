@@ -308,3 +308,21 @@ test('quick CSV quote landing captures buyer requests using existing validated l
  assert.match(legacy.headers.get('content-security-policy'),/form-action 'none'/);
  assert.equal((await w(new Request('https://taskforge.example/services/quick-csv-fix',{method:'POST'}))).status,405);
 });
+
+test('RFQ catalogue matching offer is visible and scoped without invented checkout',async()=>{
+ const w=worker();
+ const response=await w(new Request('https://taskforge.example/services/rfq-catalogue-check'));
+ assert.equal(response.status,200);
+ const page=await response.text();
+ for(const phrase of ['RFQ Product Matching','unknown item codes','approved catalogue','Request a free RFQ workflow assessment','not a PDF extractor']){
+  assert.ok(page.includes(phrase),phrase);
+ }
+ assert.match(page,/href='\/automation#b2b-lead'/);
+ assert.equal((await w(new Request('https://taskforge.example/services/rfq-catalogue-check',{method:'POST'}))).status,405);
+ const sitemap=await(await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ assert.ok(sitemap.includes('<loc>https://taskforge-ai.pages.dev/services/rfq-catalogue-check</loc>'));
+ const home=await(await w(new Request('https://taskforge.example/'))).text();
+ assert.match(home,/href='\/services\/rfq-catalogue-check'/);
+ const automation=await(await w(new Request('https://taskforge.example/automation'))).text();
+ assert.match(automation,/RFQ catalogue and quotation precheck/);
+});
