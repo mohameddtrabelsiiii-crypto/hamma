@@ -135,3 +135,7 @@ A **substantive follow-up** was SENT at approximately 20:59 UTC, replying in the
 - A **1200×630 PNG social-sharing cover was generated and visually reviewed** on the authorized PC from the original Contour Flow graphic: `C:\Users\hama\Documents\HermesWorkspace\TaskForge\cavalry\dropshipping\assets\med-art-social-sharing-1200x630.png`. It uses the Med Art name, accurate categories, original artwork and no fabricated claims. **File created, not yet verified uploaded or saved in Fourthwall**. Next zero-cost design step: add the image in Fourthwall's General → Social sharing image, save, reload, validate preview, while keeping the storefront `COMING_SOON`.
 - Fourthwall Support's 20:56 UTC statement claims Tunisia is supported via Fourthwall Stripe Connect, but the precise lawful route for a Tunisian resident with a Tunisian bank is under follow-up. Do not confuse an emailed affirmation or availability of a setup button with an active payout account.
 
+
+### 2026-10-09 21:37 UTC — local Cavalry unattended cycle verified
+
+Windows Task Scheduler `Cavalry_MedArt_LocalAI` reported successful last run at `2026-10-09T21:37:37Z` (`LastTaskResult: 0`), next scheduled for 22:37:37Z. The locally stored inference report has timestamp `2026-10-09T21:37:04Z`, role `beacon`, status `two_way_ai_communication_passed`, handoff **Beacon → Harbor**, spend_usd `0`. This is another real unattended internal AI draft exchange, not external merchant writes or sales.
