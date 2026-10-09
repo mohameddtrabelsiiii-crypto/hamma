@@ -55,11 +55,30 @@ async function cycle(env) {
   ]);
   return {role,next,cycle:cid,assignment_delivered:true,specialist_response_saved:true};
 }
+async function monitoredCycle(env) {
+  // Safe heartbeat: prove cron invocation and distinguish AI errors from a missing schedule.
+  const ts=new Date().toISOString();
+  const begin=await env.DB.prepare("INSERT INTO worker_runs(ts,status,role,error_code) VALUES(?,'RUNNING',NULL,NULL)")
+    .bind(ts).run();
+  const rid=begin.meta?.last_row_id;
+  try {
+    const result=await cycle(env);
+    const role=typeof result==="object" ? result.role : null;
+    await env.DB.prepare("UPDATE worker_runs SET status=?,role=? WHERE id=?")
+      .bind(result==="daily_budget_cap"?"SKIPPED_BUDGET":"SUCCESS",role,rid).run();
+    return result;
+  } catch(err) {
+    // Record only an error class, never messages, tokens or customer information.
+    await env.DB.prepare("UPDATE worker_runs SET status='ERROR',error_code=? WHERE id=?")
+      .bind(String(err?.name||"unclassified").slice(0,48),rid).run().catch(()=>{});
+    throw err;
+  }
+}
 export default {
   async scheduled(controller,env,ctx) {
-    ctx.waitUntil(cycle(env).catch(async(err)=>{
-      // Fail closed; errors in logs never include credentials or personal data.
+    ctx.waitUntil(monitoredCycle(env).catch(err=>{
       console.error("cavalry_cloud_cycle_failed",String(err?.name||"error"));
+      throw err;
     }));
   },
   async fetch(request,env) {
@@ -71,9 +90,10 @@ export default {
       const last=await env.DB.prepare("SELECT ts,actor,status FROM cycles ORDER BY id DESC LIMIT 1").first();
       const msgs=await env.DB.prepare("SELECT COUNT(*) AS total FROM messages").first();
       const handoffs=await env.DB.prepare("SELECT COUNT(*) AS total FROM messages WHERE kind='handoff_draft'").first();
+      const lastRun=await env.DB.prepare("SELECT ts,status,role,error_code FROM worker_runs ORDER BY id DESC LIMIT 1").first();
       const count=n?.total||0;
       return json({system:"Cavalry Med Art AI Team",mode:"cloud_prelaunch_draft_only",leader:"Cavalry",specialists:TEAM.map(a=>a[0]),
-        total_cycles:count,total_messages:msgs?.total||0,total_handoffs:handoffs?.total||0,last_cycle:last||null,next_role:TEAM[count%TEAM.length][0],
+        total_cycles:count,total_messages:msgs?.total||0,total_handoffs:handoffs?.total||0,last_cycle:last||null,last_scheduler_event:lastRun||null,next_role:TEAM[count%TEAM.length][0],
         independent_pc:true,merchant_live:false,ai_model:MODEL,external_store_writes:false,
         zero_spend_target:true,free_quota_budget_max_cycles_per_utc_day:8,
         payout_last_verified:"INACTIVE (2026-10-09)",store_last_verified:"COMING_SOON, 3 hidden POD items in one hidden collection (2026-10-09)"});
