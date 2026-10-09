@@ -1,0 +1,24 @@
+name: Cavalry Shopify connector safety tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cavalry/shopify/**'
+      - '.github/workflows/shopify-safety.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  connector-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check standalone connector and fail-closed guards
+        run: python -m unittest discover -s cavalry/shopify -p 'test_*.py' -v
