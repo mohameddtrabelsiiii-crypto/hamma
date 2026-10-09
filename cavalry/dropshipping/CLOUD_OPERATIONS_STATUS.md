@@ -45,3 +45,30 @@ The `Original Abstract Art Gifts` collection (ID `col_EuJCdIEUSY-vzJolhmXGIw`) w
 6. Promote through genuinely authorized **free** channels; no mass unsolicited outreach, paid Connects, ads, subscriptions or fake UGC.
 
 **Milestone distinction:** 3 real finished, unpublished Fourthwall catalog products = VERIFIED. Fully autonomous live sales with real payouts = NOT YET VERIFIED.
+
+
+## 2026-10-09 additional execution / validation
+
+**Authenticated Fourthwall check:** All 3 offers and their complete 11 saved variants are still `HIDDEN` / variant `UNAVAILABLE`, `fulfilledBy: FOURTHWALL`. The hidden collection has exactly 3 confirmed offer IDs and `available: false`. The collection description was updated **in the real Fourthwall account** to correctly describe the tee, mug and sticker, and subsequently re-read and verified without changing visibility.
+
+**Variant-by-variant retail price audit:**
+
+| Saved offer | Variant | USD retail price |
+|---|---|---:|
+| Contour Flow tee (black) | XS, S, M, L, XL | $22.75 each |
+| Contour Flow tee (black) | 2XL | $24.75 |
+| Contour Flow tee (black) | 3XL | $26.75 |
+| Contour Flow tee (black) | 4XL | $28.75 |
+| Contour Flow tee (black) | 5XL | $30.75 |
+| Night Geometry white glossy mug | White / 11 oz | $16.95 |
+| Orbit Notes kiss-cut sticker | White / 3 in × 3 in | $6.29 |
+
+These are verified *retail prices*, **not** net profits. All require shipping and destination checkout review before making a global sales promise.
+
+**Shipping settings check:** `ecommerce_get-shipping-profiles` returned `enabled: false`, and `ecommerce_get-shipping-flat-rates` returned `enabled: false`. Do **not** automatically switch on merchant-managed fixed-rate shipping merely because these are disabled: the saved items are Fourthwall-produced POD, while the carrier/flat-rate settings in Fourthwall's documentation describe self-fulfilled/custom merchandise. No live destination-specific shipping checkout has been verified. Fourthwall's help guidance states typical POD production 2–5 business days before transit, with international routes potentially much longer and customs dependent on route and destination. Official: https://help.fourthwall.com/frequently-asked-questions/shipping-and-orders/shipping-and-delivery-expectations
+
+**Payout correspondence:** The existing support email asking Fourthwall about a Tunisia-based shop's supported payout routes still only has the initial acknowledgment; no substantive eligibility approval yet. Live payout remains `INACTIVE`, shop remains `COMING_SOON`. Fourthwall's published bill.com path for Stripe-unsupported but Fourthwall-supported countries starts onboarding after at least $25 accrued; a provider-supported path and actual eligibility must be established, not assumed. Consequently, do not treat a pre-revenue inactive payout status *alone* as definitive permanent rejection, and do not claim bill.com settlement is already configured. Official: https://help.fourthwall.com/frequently-asked-questions/payments-and-pricing/country-not-supported-by-stripe
+
+**Cloud AI reliability:** The Cloudflare Worker has been redeployed with the updated factual catalog and distinct metrics `total_messages` vs `total_handoffs`, plus durable D1 table `worker_runs` for cron start/success/error recording. The read-only status endpoint now includes `last_scheduler_event`. Actual historical proof remains **2 manual draft cycles, 6 stored messages, 2 handoffs**. At the deployment/checkpoint, `last_scheduler_event: null`; first successful automatic cron event has NOT yet been independently observed. Cron `0 */3 * * *` is configured. No secure webhook for outside merchant writes is installed. Continue hourly reliability monitoring and investigate missing/failed cron events, distinguishing API health fetches from successful scheduled AI runs.
+
+**Safety boundary:** No ad buys, samples, purchased inventory, merchant identity forgery, public publication or paid checkout execution.
