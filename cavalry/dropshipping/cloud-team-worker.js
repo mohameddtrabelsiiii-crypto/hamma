@@ -21,8 +21,8 @@ async function cycle(env) {
   if(!env.AI||!env.DB) throw Error("bindings_missing");
   const day=new Date().toISOString().slice(0,10);
   const today=await env.DB.prepare("SELECT COUNT(*) AS n FROM cycles WHERE ts>=?").bind(day).first();
-  // Hard internal budget limiter: MAX four cloud work cycles per day / eight inference calls.
-  if((today?.n||0)>=4) return "daily_budget_cap";
+  // Hard internal budget limiter: MAX eight cloud work cycles per day / sixteen inference calls.
+  if((today?.n||0) >=8) return "daily_budget_cap";
   const total=await env.DB.prepare("SELECT COUNT(*) AS n FROM cycles").first();
   const index=(total?.n||0)%TEAM.length;
   const role=TEAM[index][0],goal=TEAM[index][1],next=TEAM[(index+1)%TEAM.length][0];
@@ -74,7 +74,7 @@ export default {
       return json({system:"Cavalry Med Art AI Team",mode:"cloud_prelaunch_draft_only",leader:"Cavalry",specialists:TEAM.map(a=>a[0]),
         total_cycles:count,total_handoffs:msgs?.total||0,last_cycle:last||null,next_role:TEAM[count%TEAM.length][0],
         independent_pc:true,merchant_live:false,ai_model:MODEL,external_store_writes:false,
-        zero_spend_target:true,free_quota_budget_max_cycles_per_utc_day:4,
+        zero_spend_target:true,free_quota_budget_max_cycles_per_utc_day:8,
         payout_last_verified:"INACTIVE (2026-10-09)",store_last_verified:"COMING_SOON (2026-10-09)"});
     } catch (e) {return json({service:"Cavalry",status:"db_unavailable"},503);}
   }
