@@ -19,6 +19,9 @@ const json=(obj,status=200)=>new Response(JSON.stringify(obj),{status,headers:{"
 const cap=s=>String(s||"").replace(/(?:Bearer\s+)[A-Za-z0-9._~+/-]+/gi,"Bearer [redacted]").slice(0,1400);
 async function cycle(env) {
   if(!env.AI||!env.DB) throw Error("bindings_missing");
+  // Keep monitoring HOURLY, but spread at most eight inference cycles evenly over 24h.
+  // This avoids burning the entire free-draft budget during the first eight hours.
+  if(new Date().getUTCHours()%3!==0) return "interval_monitor_only";
   const day=new Date().toISOString().slice(0,10);
   const today=await env.DB.prepare("SELECT COUNT(*) AS n FROM cycles WHERE ts>=?").bind(day).first();
   // Hard internal budget limiter: MAX eight cloud work cycles per day / sixteen inference calls.
@@ -65,7 +68,7 @@ async function monitoredCycle(env) {
     const result=await cycle(env);
     const role=typeof result==="object" ? result.role : null;
     await env.DB.prepare("UPDATE worker_runs SET status=?,role=? WHERE id=?")
-      .bind(result==="daily_budget_cap"?"SKIPPED_BUDGET":"SUCCESS",role,rid).run();
+      .bind(result==="daily_budget_cap"?"SKIPPED_BUDGET":result==="interval_monitor_only"?"SKIPPED_INTERVAL":"SUCCESS",role,rid).run();
     return result;
   } catch(err) {
     // Record only an error class, never messages, tokens or customer information.
