@@ -1,0 +1,26 @@
+# Hermes MCP configuration TEMPLATE — MERGE into ~/.hermes/config.yaml
+# Use WSL/Linux paths; replace PROJECT_DIR before use.
+# No secrets in this repository.
+mcp_servers:
+  filesystem:
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "PROJECT_DIR"]
+  memory:
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-memory"]
+  sequential_thinking:
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+  git:
+    command: uvx
+    args: ["mcp-server-git", "--repository", "PROJECT_DIR"]
+  playwright:
+    command: npx
+    args: ["-y", "@playwright/mcp@latest"]
+# OPTIONAL: Add GitHub MCP using its official Docker/binary install instructions
+# and a GITHUB_PERSONAL_ACCESS_TOKEN read at runtime from local secrets.
+# OPTIONAL: Configure Qdrant MCP only after running a Qdrant instance,
+# embedding service, and the qdrant MCP server.
+# n8n and GPT Researcher are separate services, not turnkey MCP stdio servers.
+# Faster Whisper is a local audio/transcription backend, not a generic MCP server.
+# Ollama is a local model provider, not an MCP server.
