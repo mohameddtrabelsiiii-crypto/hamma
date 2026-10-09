@@ -15,3 +15,9 @@ Cavalry supervises **Atlas** (demand), **Muse** (original creative), **Forge** (
 7. Only Fourthwall owns the POD shop checkout and automatic provider fulfillment. Do not redirect Med Art product buyers to the separate Whop link without a verified integration.
 
 Follow the step-by-step agent training, reliability and compliance playbook in `cavalry/dropshipping/TEAM_TRAINING.md`. Run `python cavalry/dropshipping/test_team.py` to check static controls.
+
+## Verified hosted AI team (2026-10-09)
+
+Cloudflare Worker: `cavalry-medart-agents` with scheduled cron `0 */3 * * *` (UTC), Workers AI `@cf/meta/llama-3.1-8b-instruct-fp8`, D1 `cavalry_medart_agents`. Read-only health: https://cavalry-medart-agents.mohameddtrabelsiiii.workers.dev/status . Uses a daily maximum of 8 AI cycles (Cavalry supervisor assignment + 1 specialist draft, capped). As of first tests, two real model cycles and six persistent messages were verified; Atlas handed off to Muse, Muse handed off to Forge. Both external actions and merchant sales remain blocked. Do not claim Fourthwall checkout/payout enabled; last verified shop state COMING_SOON, payout INACTIVE, zero offers. Cloud roles are operational for **internal unverified drafts**, not autonomous public selling. Cloud AI does not hold Fourthwall OAuth; PC read-only watcher is separate. Do not send real customer information into prompts or database.
+
+Hermes remains able to load this skill and coordinate the same named roles, but do not claim a confirmed Hermes `delegate_task` run until a suitable model has passed a dedicated smoke test. The connected PC's small local Ollama model download and setup are separate from the verified cloud runtime.
