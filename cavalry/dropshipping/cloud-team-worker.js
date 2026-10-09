@@ -14,7 +14,7 @@ const TEAM = [
 ];
 const MODEL="@cf/meta/llama-3.1-8b-instruct-fp8";
 const SHOP="Med Art";
-const BASELINE="Confirmed on October 9, 2026: Fourthwall Med Art Coming Soon, 0 offers, inactive payout. State may change; it is NOT a current authenticated check.";
+const BASELINE="Verified on October 9, 2026 via authenticated Fourthwall MCP: Med Art COMING_SOON, one HIDDEN Fourthwall-fulfilled Orbit Notes minimal art sticker at $6.29, one HIDDEN Original Abstract Art Gifts collection, payout INACTIVE. Price is not proof of positive net profit. This is a dated audit, not continuously authenticated cloud access.";
 const json=(obj,status=200)=>new Response(JSON.stringify(obj),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const cap=s=>String(s||"").replace(/(?:Bearer\s+)[A-Za-z0-9._~+/-]+/gi,"Bearer [redacted]").slice(0,1400);
 async function cycle(env) {
@@ -75,7 +75,7 @@ export default {
         total_cycles:count,total_handoffs:msgs?.total||0,last_cycle:last||null,next_role:TEAM[count%TEAM.length][0],
         independent_pc:true,merchant_live:false,ai_model:MODEL,external_store_writes:false,
         zero_spend_target:true,free_quota_budget_max_cycles_per_utc_day:8,
-        payout_last_verified:"INACTIVE (2026-10-09)",store_last_verified:"COMING_SOON (2026-10-09)"});
+        payout_last_verified:"INACTIVE (2026-10-09)",store_last_verified:"COMING_SOON, 1 hidden POD sticker and 1 hidden collection (2026-10-09)"});
     } catch (e) {return json({service:"Cavalry",status:"db_unavailable"},503);}
   }
 };
