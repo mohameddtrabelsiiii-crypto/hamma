@@ -27,7 +27,7 @@ Date: 2026-10-09 (UTC)
 
 ## Business launch gates **not passed**
 
-Fourthwall Med Art shop: read-only authenticated audit on 2026-10-09 showed **COMING_SOON**, zero product offers and **INACTIVE payout**. The scheduled cloud team currently cannot log into or write Fourthwall. A separate read-only OAuth watcher on the PC had been validated. Public sale, live product listing, checkout and real fulfillment **were NOT executed or proven**. Fourthwall owns its POD checkout; the separate Whop checkout is not a tested Fourthwall integration.
+Fourthwall Med Art shop: read-only authenticated audit on 2026-10-09 initially showed **COMING_SOON**, zero product offers and **INACTIVE payout**. A later authenticated Fourthwall check on 2026-10-09 confirmed **one HIDDEN Fourthwall-fulfilled Orbit Notes sticker priced at $6.29 and one HIDDEN Original Abstract Art Gifts collection**, with merchant payout still **INACTIVE**. These are not live purchasable products. The scheduled cloud team currently cannot log into or write Fourthwall. A separate read-only OAuth watcher on the PC had been validated. Public sale, live product listing, checkout and real fulfillment **were NOT executed or proven**. Fourthwall owns its POD checkout; the separate Whop checkout is not a tested Fourthwall integration.
 
 Store launch requires legal merchant payout verification (owner KYC/tax details as requested by the platform), original/licensed finished artwork with real manufacturing specifications, verified base costs and margins, policies/support, product drafts reviewed, public launch and safe test checkout. Do not bypass these controls.
 
