@@ -360,7 +360,7 @@ test('Excel consolidation bilingual landing makes a genuine validated lead offer
  assert.match(html,/href='https:\/\/github.com\/mohameddtrabelsiiii-crypto\/hamma/);
  assert.match(page.headers.get('content-security-policy'),/connect-src 'self'/);
  assert.match(page.headers.get('content-security-policy'),/form-action 'self'/);
- const embedded=html.match(/<script>([\\s\\S]*?)<\\/script>/);
+ const embedded=html.match(/<script>([\s\S]*?)<\/script>/);
  assert.ok(embedded);
  new vm.Script(embedded[1]);
  assert.equal((await w(new Request('https://taskforge.example'+route,{method:'POST'}))).status,405);
