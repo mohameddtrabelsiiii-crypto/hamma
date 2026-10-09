@@ -3,13 +3,13 @@
 This pack prepares **11 optional open-source integrations** for Hermes Agent without adding paid subscriptions or modifying the TaskForge production deployment.
 
 ## Prerequisites
-Hermes runs reliably on Windows through **WSL2 (Ubuntu)**. Follow the [official Windows quickstart](https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/windows-wsl-quickstart.md). Install Node.js and Python/uv **inside WSL**. Ollama can run on Windows with its localhost endpoint reachable from WSL depending on network configuration. Do not automatically install WSL or expose network services.
+Hermes supports native Windows as well as WSL2. Official native Windows instructions: https://hermes-agent.nousresearch.com/docs/user-guide/windows-native . Native Hermes lives under `%LOCALAPPDATA%\\hermes` and is still installing on the inspected machine (2026-10-09); do not overwrite an installer in progress. Native Windows MCP commands must use available Windows executables (e.g., `npx.cmd`) and Windows paths. WSL2 remains an alternative, not a requirement.
 
-1. Install WSL2 and Hermes using official instructions (verify sources before running installers).
-2. Clone this GitHub repo inside WSL with Git.
-3. Run `bash hermes/scripts/check-prerequisites.sh`. Fix missing dependencies.
+1. Finish installing Hermes natively on Windows, using the official installer. Open a new shell and verify `hermes --help`. WSL2 is optional.
+2. Clone this GitHub repo with Git once its installer completes, or download the branch archive.
+3. On native Windows, check `hermes --help`, `node --version`, `npx.cmd --version`, `git --version`, and `uvx --version`. On Linux/WSL, run `bash hermes/scripts/check-prerequisites.sh`.
 4. Install the chosen MCP packages and local backends from their official repos, using pinned verified versions for production.
-5. Copy `hermes/config.template.yaml` to `~/.hermes/config.yaml` **after editing the absolute project directory** and merge with existing settings instead of overwriting them.
+5. Merge `hermes/config.template.yaml` into the **actual** Hermes config discovered from its native Windows installation; do not assume `~/.hermes` on Windows. Change `PROJECT_DIR` to an authorized absolute path. Do not overwrite existing settings.
 6. Enable only services that are actually running, with credentials supplied **only through local environment or a secret manager**.
 7. Launch `hermes chat` and test each server's tool discovery and read-only smoke tests.
 
@@ -32,7 +32,7 @@ Hermes runs reliably on Windows through **WSL2 (Ubuntu)**. Follow the [official 
 **Do not activate optional MCP servers before checking supported command syntax and dependencies.** Hermes' MCP server config lives at `~/.hermes/config.yaml`. The file in this repo is a *template*, not an installed configuration.
 
 ## Validation gates
-- `hermes --help` responds inside WSL.
+- `hermes --help` responds in the selected native Windows or WSL2 environment.
 - `hermes mcp catalog` works and configured servers start without errors.
 - A sample filesystem listing only sees the explicitly authorized worktree.
 - Browser actions are restricted to authorized sites.
