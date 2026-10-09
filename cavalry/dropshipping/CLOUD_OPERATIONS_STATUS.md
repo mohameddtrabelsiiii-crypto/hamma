@@ -16,6 +16,15 @@ Actual artwork was uploaded through the authenticated Fourthwall product designe
 
 The `Original Abstract Art Gifts` collection (ID `col_EuJCdIEUSY-vzJolhmXGIw`) was authenticated and confirmed to contain **all 3** offer IDs, `state: HIDDEN`, `available: false`. **Do not create duplicate offers or collections.**
 
+## Payout and launch legal/operational interpretation (updated 2026-10-09)
+
+Official Fourthwall documentation confirms:
+- **There are no fixed monthly charges for the Free plan's physical POD products**, but processing fees apply per sale (domestic cards 2.9% + $0.30, international cards 3.9% + $0.30; PayPal and BNPL are higher). These fees are computed on the checkout total including shipping and tax where applicable. Source: https://help.fourthwall.com/frequently-asked-questions/payments-and-pricing/transaction-fees
+- Fourthwall does **not require a credit card** if product pricing leaves a nonnegative balance, and orders with negative balances can be blocked instead. No discount or giveaway below break-even under the owner's $0 policy. Source: https://help.fourthwall.com/frequently-asked-questions/payments-and-pricing/why-credit-card-is-needed
+- Fourthwall's **first-payout site verification** permits stores to sell and fulfill orders while the first payout transfer is held. This is not the same as having a verified destination for the funds. Source: https://help.fourthwall.com/frequently-asked-questions/payments-and-pricing/site-verification-before-first-payout
+- Fourthwall states unsupported-Stripe creators can use **bill.com**, with onboarding generally after a $25 balance, but Fourthwall's explicit hard-blocked-country list does not include Tunisia. Still, this **does not guarantee** Med Art's particular legal owner/bank eligibility. Support reply remains pending. Source: https://help.fourthwall.com/frequently-asked-questions/payments-and-pricing/country-not-supported-by-stripe
+- **Business decision:** technically a brand-new shop *may* accept paid orders before first payout is verified, with earnings held by Fourthwall; nevertheless retain Med Art's unpublished state until the owner can lawfully and reliably recover funds, customer-facing checkout and shipping are verified, and no negative-balance risk is introduced. Avoid the misleading blanket statement that Fourthwall *forbids* sales before first payout approval.
+
 ## Storefront and payment: NOT READY
 
 - Authenticated shop status: `COMING_SOON` as of 2026-10-09.
@@ -30,9 +39,9 @@ The `Original Abstract Art Gifts` collection (ID `col_EuJCdIEUSY-vzJolhmXGIw`) w
 
 - Cloudflare Worker `cavalry-medart-agents` at https://cavalry-medart-agents.mohameddtrabelsiiii.workers.dev/status
 - Workers AI binding `AI`, D1 binding `DB` to database `cavalry_medart_agents`.
-- Scheduler: `0 */3 * * *` UTC, up to **8 total AI cycles per day** / 2 inference requests per cycle; shared Cloudflare account metered-spend must separately be monitored.
+- Scheduler: **`0 * * * *` UTC (hourly)**, verified updated through Cloudflare API on 2026-10-09 at 18:15 UTC; up to **8 AI cycles per UTC day** / two inference requests per successful cycle. The worker_run heartbeat records attempts, completed cycles and error classes in D1. The first unattended scheduled completion was **NOT YET VERIFIED** immediately after the configuration change. Cloudflare trigger changes may need propagation time. Shared-account usage/billing limits remain separate from the app's own cap.
 - Nine sequential specialist roles under Cavalry; D1 persists assigned messages, next-role handoff drafts and supervisor reports with `verified=0`.
-- **2 manual AI cycles**, **2 role-to-role handoffs** and **6 total stored messages** were verified. The status API now reports messages and handoffs separately. **A cron-triggered cycle has not yet been independently observed** as of this checkpoint. Never claim that nine dedicated agents run simultaneously or that merchant writes occur; Cloudflare Worker is intentionally read-only to outside apps.
+- **2 manual AI cycles**, **2 role-to-role handoffs** and **6 total stored messages** were verified. The status API now reports messages and handoffs separately and contains a `last_scheduler_event` field backed by the new D1 `worker_runs` table. As of 2026-10-09 18:15 UTC, `worker_runs` had no events, and **a cron-triggered cycle had not yet been independently observed**. Cron has been shortened to hourly; inspect again after 19:00 UTC plus a propagation grace interval. Never claim that nine dedicated agents run simultaneously or that merchant writes occur; Cloudflare Worker is intentionally read-only to outside apps.
 - Chrome and Firefox can be used via the authorized Remote Desktop Commander Windows PC when online, but the cloud draft Worker does not require it. Local Ollama has `qwen3.5:0.8b` and `qwen2.5:1.5b`; model availability does not itself prove unattended local inference.
 
 ## Immediate operator priorities
