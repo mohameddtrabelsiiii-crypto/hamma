@@ -346,3 +346,26 @@ test('restaurant inventory landing uses fictional proof, clear scope and safe in
  assert.match(home,/\/services\/restaurant-stock-dashboard/);
  assert.match(response.headers.get('content-security-policy'),/form-action 'none'/);
 });
+
+test('Excel consolidation bilingual landing makes a genuine validated lead offer',async()=>{
+ const w=worker();
+ const route='/services/excel-consolidation';
+ const page=await w(new Request('https://taskforge.example'+route));
+ assert.equal(page.status,200);
+ const html=await page.text();
+ for(const phrase of ['Combine multiple authorized Excel','3 fictional source workbooks','12 rows','3 flagged records','دمج ملفات','How many source files and worksheets?','Excel and CSV consolidation quote request. Approximate total rows: ','/api/lead']){
+  assert.ok(html.includes(phrase),phrase);
+ }
+ assert.match(html,/id="csv-quote"/);
+ assert.match(html,/href='https:\/\/github.com\/mohameddtrabelsiiii-crypto\/hamma/);
+ assert.match(page.headers.get('content-security-policy'),/connect-src 'self'/);
+ assert.match(page.headers.get('content-security-policy'),/form-action 'self'/);
+ const embedded=html.match(/<script>([\\s\\S]*?)<\\/script>/);
+ assert.ok(embedded);
+ new vm.Script(embedded[1]);
+ assert.equal((await w(new Request('https://taskforge.example'+route,{method:'POST'}))).status,405);
+ const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ assert.ok(sitemap.includes('https://taskforge-ai.pages.dev'+route));
+ const homepage=await (await w(new Request('https://taskforge.example/'))).text();
+ assert.ok(homepage.includes('href="\/services\/excel-consolidation"'));
+});
