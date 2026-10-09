@@ -326,3 +326,23 @@ test('RFQ catalogue matching offer is visible and scoped without invented checko
  const automation=await(await w(new Request('https://taskforge.example/automation'))).text();
  assert.match(automation,/RFQ catalogue and quotation precheck/);
 });
+
+
+test('restaurant inventory landing uses fictional proof, clear scope and safe inquiry',async()=>{
+ const w=worker();
+ const url='https://taskforge.example/services/restaurant-stock-dashboard';
+ const response=await w(new Request(url));
+ assert.equal(response.status,200);
+ const page=await response.text();
+ for(const term of ['Restaurant Inventory','Supplier Dashboard','Stock issues','supplier','fictional','Request a free inventory dashboard scope review']){
+  assert.ok(page.toLowerCase().includes(term.toLowerCase()),term);
+ }
+ assert.match(page,/href='\/automation#b2b-lead'/);
+ assert.match(page,/sales\/restaurant-inventory-demo/);
+ assert.equal((await w(new Request(url,{method:'POST'}))).status,405);
+ const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ assert.match(sitemap,/\/services\/restaurant-stock-dashboard/);
+ const home=await (await w(new Request('https://taskforge.example/'))).text();
+ assert.match(home,/\/services\/restaurant-stock-dashboard/);
+ assert.match(response.headers.get('content-security-policy'),/form-action 'none'/);
+});
