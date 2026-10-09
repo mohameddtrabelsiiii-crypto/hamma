@@ -15,7 +15,7 @@ import urllib.request
 HERE = pathlib.Path(__file__).resolve().parent
 RUNTIME = HERE.parent / "runtime"
 DATABASE = RUNTIME / "commerce_agents.sqlite3"
-MODEL = os.environ.get("CAVALRY_OLLAMA_MODEL", "qwen3.5:0.8b")
+MODEL = os.environ.get("CAVALRY_OLLAMA_MODEL", "qwen2.5:1.5b")
 URL = "http://127.0.0.1:11434/api/chat"
 NEXT = {
     "atlas": "muse", "muse": "forge", "forge": "ledger",
