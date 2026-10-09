@@ -1,38 +1,47 @@
-# Cavalry Med Art — verified autonomous cloud draft engine
+# Cavalry / Med Art — operational launch checkpoint
 
-Date: 2026-10-09 (UTC)
+**Last verified: 2026-10-09 UTC.** Status below is grounded in authenticated connected Fourthwall/Gmail/Cloudflare checks. It is **not** proof of revenue, public checkout, or merchant approval.
 
-## What actually runs
+## Product catalog: COMPLETED — hidden prelaunch
 
-- Cloudflare Worker `cavalry-medart-agents`, source: `cloud-team-worker.js`.
-- Cloudflare Workers AI model `@cf/meta/llama-3.1-8b-instruct-fp8`.
-- Persistent D1 database `cavalry_medart_agents`. Tables: `cycles` and `messages`. Every AI-authored message is `verified=0`.
-- Scheduled execution: `0 */3 * * *` UTC; eight runs maximum per UTC day; two model calls per run: one Cavalry supervisor instruction, one specialist draft. No external posting, payments, customer data, product creation, refunds, ads, or bank updates from this Worker.
-- Nine role rotation: Atlas -> Muse -> Forge -> Ledger -> Sentinel -> Pulse -> Beacon -> Harbor -> Relay -> Atlas.
-- Once per role cycle: retrieve last relevant handoff, Cavalry gives role a scoped assignment, specialist generates a draft and sends it to the next specialist AND Cavalry, D1 durably stores 3 messages.
-- This is true hosted AI text inference; it does not rely on the Windows PC staying on.
-- Public read-only machine status: https://cavalry-medart-agents.mohameddtrabelsiiii.workers.dev/status
-- Cloudflare account AI/D1 usage planned to remain within free allocation. This is not a guarantee if other account services exhaust shared quotas or the account has metered billing. Hard cap of 8 daily cycles is app-local, not an account-wide billing cap.
+Authenticated Fourthwall `ecommerce_get-offers` confirmed **3** products. All use Fourthwall fulfillment; all are **HIDDEN**:
 
-## Validation completed on 2026-10-09
+| Item | Selling price | Variants | Fourthwall offer ID |
+| --- | ---: | ---: | --- |
+| Orbit Notes — Minimal Art Sticker | $6.29 USD | 1 | `ca3d2f32-9532-4f06-9de6-4fe0adcd4739` |
+| Contour Flow — Original Abstract Art Tee | $22.75 USD | 9 | `fb458dda-5aa8-416a-8978-fc6025dc9490` |
+| Night Geometry — Original Abstract Art Mug | $16.95 USD | 1 | `428cedc6-5a50-4ac6-a0db-04c16257fbbd` |
 
-1. Cloudflare Workers AI returned an actual model response.
-2. D1 database tables created and queried successfully.
-3. Cloudflare Worker deployed with both `AI` and `DB` bindings.
-4. Public `/status` returned HTTP success with team and cycle metrics.
-5. Cloudflare cron verified present, set to `0 */3 * * *`.
-6. Manual two-agent communication cycles tested: Cavalry -> Atlas -> Muse -> Forge, with 2 specialist outputs, 2 supervisor assignments, 6 durable messages. Persistent message read from Atlas to Muse confirmed.
-7. Atlas's initial output contained unsupported market claims; the Muse-facing handoff was corrected and marked as unverified. Source-backed research remains necessary.
-8. Windows companion `autonomous_team.py` is installed locally and in GitHub. Mocked inference and fail-closed tests passed; live local model completion is not yet verified.
+Actual artwork was uploaded through the authenticated Fourthwall product designer; generated tee and mug mockups were visually inspected. The tee editor displayed about **$11 expected margin** for the selected variant before any additional costs; do not extrapolate to shipping, fees, different variants, refunds, or net realized profit. No samples were purchased. No stock was ordered.
 
-## Business launch gates **not passed**
+The `Original Abstract Art Gifts` collection (ID `col_EuJCdIEUSY-vzJolhmXGIw`) was authenticated and confirmed to contain **all 3** offer IDs, `state: HIDDEN`, `available: false`. **Do not create duplicate offers or collections.**
 
-Fourthwall Med Art shop: read-only authenticated audit on 2026-10-09 initially showed **COMING_SOON**, zero product offers and **INACTIVE payout**. A later authenticated Fourthwall check on 2026-10-09 confirmed **one HIDDEN Fourthwall-fulfilled Orbit Notes sticker priced at $6.29 and one HIDDEN Original Abstract Art Gifts collection**, with merchant payout still **INACTIVE**. These are not live purchasable products. The scheduled cloud team currently cannot log into or write Fourthwall. A separate read-only OAuth watcher on the PC had been validated. Public sale, live product listing, checkout and real fulfillment **were NOT executed or proven**. Fourthwall owns its POD checkout; the separate Whop checkout is not a tested Fourthwall integration.
+## Storefront and payment: NOT READY
 
-Store launch requires legal merchant payout verification (owner KYC/tax details as requested by the platform), original/licensed finished artwork with real manufacturing specifications, verified base costs and margins, policies/support, product drafts reviewed, public launch and safe test checkout. Do not bypass these controls.
+- Authenticated shop status: `COMING_SOON` as of 2026-10-09.
+- Authenticated payout status: `INACTIVE` as of 2026-10-09.
+- Verified completed sales and settled payouts: **none established**.
+- Fourthwall Support was contacted about a Tunisia-based owner and permitted payout routes. As of last Gmail check on 2026-10-09, only the automatic ticket acknowledgement has been received. Avoid duplicate requests.
+- Fourthwall's official article (updated 2026-09-30) describes **bill.com** onboarding for eligible creators whose country/bank is not supported by Stripe Connect; threshold generally $25 and provider-issued invite after the threshold. Tunisia is **not** listed in Fourthwall's published completely-unsupported countries, but **eligibility for this particular owner/shop is not yet approved**. Official source: https://help.fourthwall.com/frequently-asked-questions/payments-and-pricing/country-not-supported-by-stripe
+- Any bank details, legal owner identity, tax requirements and KYC verification must be genuine and completed through authorized official onboarding. Never bypass them, never use someone else's banking/residence, never use Whop as a supposedly integrated Fourthwall checkout.
+- **Do not publish the products or switch the site to LIVE** until payout route is confirmed, product cost/variants/shipping/checkout have been reviewed, and a no-spend checkout walkthrough or legitimate test (if available) passes.
 
-## Security and economics
+## Cloud Cavalry: DEPLOYED, draft-only
 
-No third-party pay-per-use model was connected on the Windows PC. The Cloudflare model uses its own server-side AI binding. Never copy Fourthwall OAuth tokens, financial data, personal identities, customer contacts, payment details, or other private fields into D1 or public GitHub. Product and market claims remain unverified until evidenced.
+- Cloudflare Worker `cavalry-medart-agents` at https://cavalry-medart-agents.mohameddtrabelsiiii.workers.dev/status
+- Workers AI binding `AI`, D1 binding `DB` to database `cavalry_medart_agents`.
+- Scheduler: `0 */3 * * *` UTC, up to **8 total AI cycles per day** / 2 inference requests per cycle; shared Cloudflare account metered-spend must separately be monitored.
+- Nine sequential specialist roles under Cavalry; D1 persists assigned messages, next-role handoff drafts and supervisor reports with `verified=0`.
+- **2 manual AI cycles**, **2 role-to-role handoffs** and **6 total stored messages** were verified. The status API now reports messages and handoffs separately. **A cron-triggered cycle has not yet been independently observed** as of this checkpoint. Never claim that nine dedicated agents run simultaneously or that merchant writes occur; Cloudflare Worker is intentionally read-only to outside apps.
+- Chrome and Firefox can be used via the authorized Remote Desktop Commander Windows PC when online, but the cloud draft Worker does not require it. Local Ollama has `qwen3.5:0.8b` and `qwen2.5:1.5b`; model availability does not itself prove unattended local inference.
 
-**Definition**: Multi-agent cloud draft execution = proven. Unattended full commercial dropshipping store with sales and payouts = not proven and still blocked.
+## Immediate operator priorities
+
+1. Monitor the **existing** Fourthwall Support email thread until a substantive payout eligibility answer, then complete only legitimate onboarding steps; sensitive identity/banking submission may require the owner.
+2. Verify base prices **per variant**, payment/platform fees, destination-specific shipping, customer-facing taxes/duties notices, fulfillment/refund policy and support contact. No paid sample order under the zero-cost constraint.
+3. Finish prelaunch site copy and SEO using only original artwork and verifiable product specifications. Avoid fabricated testimonials, unsupported medical claims, promised delivery dates, or demand metrics.
+4. Confirm a checkout journey is available and shipping rates show before any public launch; do not place an actual charge merely as a test.
+5. Publish only after merchant payout and checkout safety gates are satisfied and all public copy/links are verified.
+6. Promote through genuinely authorized **free** channels; no mass unsolicited outreach, paid Connects, ads, subscriptions or fake UGC.
+
+**Milestone distinction:** 3 real finished, unpublished Fourthwall catalog products = VERIFIED. Fully autonomous live sales with real payouts = NOT YET VERIFIED.
