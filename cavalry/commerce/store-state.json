@@ -1,0 +1,78 @@
+{
+  "project": "Cavalry Commerce — Med Art",
+  "last_authenticated_store_audit_date": "2026-10-09",
+  "last_context_review_date": "2026-10-10",
+  "fresh_store_audit_required": true,
+  "shop": {
+    "platform": "Fourthwall",
+    "public_url": "https://med-art-shop.fourthwall.com",
+    "visibility_at_last_audit": "COMING_SOON",
+    "payout_at_last_audit": "INACTIVE",
+    "live_checkout_verified": false,
+    "fulfillment_test_verified": false,
+    "orders_revenue_profit_verified": false
+  },
+  "catalog": {
+    "offers_at_last_audit": 1,
+    "products": [
+      {
+        "name": "Orbit Notes - Minimal Art Sticker",
+        "fulfillment": "FOURTHWALL_POD",
+        "slug": "orbit-notes-minimal-art-sticker",
+        "creation_verified": true,
+        "publishing_at_creation": "UNPUBLISHED",
+        "margin_status": "Fourthwall UI indicated 4 USD gross target; net margin NOT verified"
+      },
+      {
+        "name": "Contour Flow — Abstract Line Art Tee",
+        "creation_verified": false,
+        "art_file_on_pc": "contour-flow-shirt.png",
+        "reference_catalog_product": "Bella+Canvas Unisex Supersoft T-Shirt, white/natural, sizes to confirm"
+      },
+      {
+        "name": "Night Geometry — Modern Abstract Mug",
+        "creation_verified": false,
+        "art_file_on_pc": "night-geometry-mug.png",
+        "reference_catalog_product": "White Glossy Mug 11 oz, sizes to confirm"
+      }
+    ],
+    "collections": [
+      {
+        "name": "Original Abstract Art Gifts",
+        "visibility": "HIDDEN",
+        "verified": true
+      }
+    ]
+  },
+  "payments": {
+    "support_statement_received": "2026-10-09",
+    "support_claim": "Tunisia payout eligible through Fourthwall Stripe flow",
+    "unresolved_issue": "Genuine Tunisia-resident owner and Tunisia-bank Stripe Connect onboarding not independently validated; clarification requested",
+    "onboarding_completed": false
+  },
+  "automation": {
+    "local_hermes_profile": "cavalry",
+    "local_model": "qwen2.5:1.5b via Ollama",
+    "model_download_verified": true,
+    "model_inference_success_verified": false,
+    "cloud_public_site_hourly_monitor_scheduled": true,
+    "local_jobs_require_online_pc": true
+  },
+  "guardrails": {
+    "upfront_spend_usd": 0,
+    "publish_products_when_unverified": false,
+    "launch_when_payout_inactive": false,
+    "use_external_artwork_urls_for_POD": false,
+    "copy_sensitive_tokens_to_git": false,
+    "create_duplicate_products": false
+  },
+  "next_steps": [
+    "Reaudit Fourthwall with official OAuth after PC reconnect",
+    "Check existing products before draft writes",
+    "Upload original tee and mug artwork using native managed artwork process and keep new offers unpublished",
+    "Verify pricing, tax, delivery, return policy and checkout before storefront launch",
+    "Receive support clarification, then complete only legal secure merchant onboarding",
+    "Test free local Hermes inference and decide if quality is sufficient",
+    "Run legitimate organic traffic experiments only after brand and compliance checks"
+  ]
+}
