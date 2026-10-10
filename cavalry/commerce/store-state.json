@@ -141,7 +141,24 @@
       "verified": true,
       "hermes_end_to_end_not_tested": true
     },
-    "hermes_end_to_end_inference_verified": false
+    "hermes_end_to_end_inference_verified": false,
+    "local_scheduler_latest_verified": {
+      "device": "DESKTOP-ADP8R8D",
+      "task": "Cavalry_MedArt_LocalAI",
+      "scheduled_run_local": "2026-10-10 03:37:37 UTC-11",
+      "scheduled_run_utc": "2026-10-10T14:37:37Z",
+      "last_task_result": 0,
+      "missed_runs_at_check": 0,
+      "next_run_local": "2026-10-10 04:37:37 UTC-11",
+      "local_agent_output_timestamp_utc": "2026-10-10T14:37:05+00:00",
+      "local_agent_output_role": "ledger",
+      "local_agent_output_status": "two_way_ai_communication_passed",
+      "local_agent_output_messages_sent": 3,
+      "local_agent_output_handed_to": "sentinel",
+      "model": "qwen2.5:1.5b",
+      "verified_at_utc": "2026-10-10T14:58:00Z",
+      "note": "Genuine automatic scheduler execution and local Ollama agent output confirmed after earlier 11 missed runs. Task exit 0 and draft handoff are not store actions, sales, or checkout proof; PC must remain available for future runs."
+    }
   },
   "guardrails": {
     "upfront_spend_usd": 0,
