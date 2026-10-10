@@ -19,6 +19,20 @@ const json=(obj,status=200)=>new Response(JSON.stringify(obj),{status,headers:{"
 const cap=s=>String(s||"").replace(/(?:Bearer\s+)[A-Za-z0-9._~+/-]+/gi,"Bearer [redacted]").slice(0,1400);
 // An AI HTTP success is NOT proof of usable draft work. Reject generic refusals.
 const unusable=s=>/^\s*(?:sorry\b|i\s+(?:cannot|can.t|can not|won.t|am unable)\b|as an ai\b)/i.test(s)||/is there anything else i can help you with\??\s*$/i.test(s);
+/* Automatic draft quarantine: POD goods are supplier-produced, not handmade.
+ * Do not let a model invent return guarantees, fulfillment times, medical
+ * benefits, reviews or scarcity. Flag uncertainties for human review instead. */
+const unverifiedCommerceClaims=s=>[
+  /\b(?:handmade|handcrafted|one.of.a.kind|best.selling|limited.edition|health.focused)\b/i,
+  /\b(?:guaranteed refund|full refund|free returns|no.questions.asked)\b/i,
+  /\b(?:we (?:will|guarantee to) (?:provide|issue|offer).{0,30}refund)\b/i,
+  /\b(?:we (?:ship|deliver)|shipping guaranteed|delivery guaranteed).{0,35}\bwithin\s+\d+\s+(?:business\s+)?days?\b/i,
+  /\[(?:timeframe|price|name|contact|shipping|return period|\d+ days)\]/i,
+  /\b(?:clinically proven|medical benefits|certified organic)\b/i,
+  /\b(?:thousands of happy customers|five.star rated|customer favorite)\b/i
+].some(pattern=>pattern.test(String(s||"")));
+const draftRejected=s=>unusable(s)||unverifiedCommerceClaims(s);
+
 async function cycle(env) {
   if(!env.AI||!env.DB) throw Error("bindings_missing");
   // Keep monitoring HOURLY, but spread at most eight inference cycles evenly over 24h.
@@ -32,7 +46,7 @@ async function cycle(env) {
   const index=(total?.n||0)%TEAM.length;
   const role=TEAM[index][0],goal=TEAM[index][1],next=TEAM[(index+1)%TEAM.length][0];
   const last=await env.DB.prepare("SELECT sender,body FROM messages WHERE recipient=? ORDER BY id DESC LIMIT 1").bind(role).first();
-  const handoff=last ? ("Message from "+last.sender+" [UNVERIFIED DRAFT]: "+cap(last.body).slice(0,450)) : "No prior specialist handoff.";
+  const handoff=last&&!draftRejected(last.body) ? ("Message from "+last.sender+" [UNVERIFIED DRAFT]: "+cap(last.body).slice(0,450)) : "No safe prior specialist handoff.";
   const supervisor=await env.AI.run(MODEL,{
     messages:[
       {role:"system",content:"You are Cavalry, a professional POD planning supervisor. Assign a helpful short INTERNAL DRAFT task; creative marketing and research drafts are allowed. Do not actually post, contact buyers or claim external actions, store launch, payment or sales have occurred. Max 70 words."},
@@ -40,17 +54,17 @@ async function cycle(env) {
     ],max_tokens:115,temperature:0.2
   });
   let assigned=cap(supervisor?.response);
-  if(unusable(assigned)) assigned="Internal, unpublished creative/research task: "+goal+". Produce a useful short DRAFT only. Never assert unverified store actions, production specifications, demand, prices or sales.";
+  if(draftRejected(assigned)) assigned="Internal, unpublished creative/research task: "+goal+". Produce a useful short DRAFT only. Never assert unverified store actions, production specifications, demand, prices or sales.";
   if(assigned.length<5) throw Error("supervisor_empty");
   const ai=await env.AI.run(MODEL,{
     messages:[
-      {role:"system",content:"You are the "+role+" specialist under Cavalry. Prepare a practical, unpublished INTERNAL DRAFT, not an external action. Writing benign proposed social copy or reviewing copy is allowed. Avoid false claims, fabricated metrics, copied brands, or statements that products are on sale. The only real collection is Original Abstract Art Gifts. Give a useful next step to "+next+". Max 100 words."},
+      {role:"system",content:"You are the "+role+" specialist under Cavalry. Prepare a practical, unpublished INTERNAL DRAFT, not an external action. Writing benign proposed social copy or reviewing copy is allowed. Avoid false claims, fabricated metrics, copied brands, or statements that products are on sale. The only real collection is Original Abstract Art Gifts. These are POD supplier-produced items, never handmade or one-of-a-kind. Do not promise refunds, fixed shipping days, scarcity, health benefits or claim reviews. If policy, shipping, price or materials are unknown, mark them TO VERIFY. Give a useful next step to "+next+". Max 100 words."},
       {role:"user",content:"Cavalry assignment: "+assigned+". Role brief: "+goal+". "+handoff}
     ],max_tokens:165,temperature:0.35
   });
   const draft=cap(ai?.response);
   if(draft.length<8) throw Error("specialist_empty");
-  const draftStatus=unusable(draft)?"DRAFT_REJECTED":"AI_DRAFT_COMPLETED";
+  const draftStatus=draftRejected(draft)?"DRAFT_REJECTED":"AI_DRAFT_COMPLETED";
   const ts=new Date().toISOString();
   const wrote=await env.DB.prepare("INSERT INTO cycles(ts,actor,status,model,verified) VALUES(?,?,?,?,0)")
     .bind(ts,role,draftStatus,MODEL).run();
@@ -104,7 +118,7 @@ export default {
       return json({system:"Cavalry Med Art AI Team",mode:"cloud_prelaunch_draft_only",leader:"Cavalry",specialists:TEAM.map(a=>a[0]),
         total_cycles:count,total_messages:msgs?.total||0,total_handoffs:handoffs?.total||0,last_cycle:last||null,last_scheduler_event:lastRun||null,next_role:TEAM[count%TEAM.length][0],
         independent_pc:true,merchant_live:false,ai_model:MODEL,external_store_writes:false,
-        zero_spend_target:true,free_quota_budget_max_cycles_per_utc_day:8,
+        zero_spend_target:true,free_quota_budget_max_cycles_per_utc_day:8,quality_guardrail:"refusal_and_unsupported_commerce_claims_v2",
         payout_last_verified:"INACTIVE (2026-10-09)",store_last_verified:"COMING_SOON, 3 hidden POD items in one hidden collection (2026-10-09)"});
     } catch (e) {return json({service:"Cavalry",status:"db_unavailable"},503);}
   }
