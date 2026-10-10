@@ -22,7 +22,17 @@ def write_json(path, data):
         json.dump(data,f,indent=2,ensure_ascii=False)
         f.write("\n")
         tmp=f.name
-    os.replace(tmp,path)
+    try:
+        os.replace(tmp,path)
+    except PermissionError:
+        # Windows may deny replacing a file held open by another process.
+        # This is a local, non-critical status snapshot; use a direct write fallback.
+        try:
+            with path.open("w",encoding="utf-8") as dest:
+                json.dump(data,dest,indent=2,ensure_ascii=False)
+                dest.write("\n")
+        finally:
+            pathlib.Path(tmp).unlink(missing_ok=True)
 
 def contribution(price,base,processing,shipping=0,reserve=0,taxes=0,ads=0):
     values=(price,base,processing,shipping,reserve,taxes,ads)
@@ -46,7 +56,9 @@ def run():
     gates={
       "authenticated_recent_shop_audit":fresh,
       "active_verified_payout":fresh and str(health.get("payout_status","")).upper()=="ACTIVE",
-      "three_sellable_pod_listings":fresh and isinstance(health.get("offer_count"),int) and health["offer_count"]>=3,
+      # Count of offers is NOT evidence they are public, purchasable or stocked.
+      # Med Art's three current Fourthwall offers are all HIDDEN and UNAVAILABLE.
+      "three_sellable_pod_listings":False,
       "shop_public":fresh and str(health.get("site_status","")).upper() in ("LIVE","PUBLISHED","OPEN"),
       "verified_prices_and_contribution":False,
       "policies_and_checkout_tested":False,
@@ -94,3 +106,5 @@ if __name__=="__main__":
     r=run()
     print(json.dumps({"leader":r["team_lead"],"roles":r["agents"],"audit":r["store_health"],
                       "blocked_gates":len(r["blocked_gates"]),"live":r["launch_ready"]}))
+
+[executed on device: DESKTOP-ADP8R8D (c08082c0-0c59-4745-87d9-daa8ea58fccb)]
