@@ -11,10 +11,10 @@ try {
 $modelAvailable = $false
 try {
   $tags = Invoke-RestMethod -Uri 'http://127.0.0.1:11434/api/tags' -TimeoutSec 8
-  $modelAvailable = [bool](@($tags.models | Where-Object { $_.name -eq 'qwen2.5:1.5b' }).Count -gt 0)
+  $modelAvailable = [bool](@($tags.models | Where-Object { $_.name -eq 'qwen3.5:0.8b' }).Count -gt 0)
 } catch {}
 $config = @(Get-Content (Join-Path $h 'config.yaml'))
-$localConfigured = [bool](($config -match '^  default: "qwen2\.5:1\.5b"').Count -gt 0 -and ($config -match '^  provider: "ollama"').Count -gt 0)
+$localConfigured = [bool](($config -match '^  default: "qwen3\.5:0\.8b"').Count -gt 0 -and ($config -match '^  provider: "ollama"').Count -gt 0)
 $jobHealthy = $false
 try {
   $jobs = (Get-Content (Join-Path $h 'cron\jobs.json') -Raw | ConvertFrom-Json).jobs
