@@ -17,6 +17,8 @@ const SHOP="Med Art";
 const BASELINE="Verified on October 9, 2026 via authenticated Fourthwall MCP: Med Art COMING_SOON, three HIDDEN Fourthwall-fulfilled print-on-demand products (Orbit Notes sticker $6.29, Contour Flow tee $22.75, Night Geometry mug $16.95) in one HIDDEN Original Abstract Art Gifts collection, payout INACTIVE. Price is not proof of positive net profit. This is a dated audit, not continuously authenticated cloud access.";
 const json=(obj,status=200)=>new Response(JSON.stringify(obj),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 const cap=s=>String(s||"").replace(/(?:Bearer\s+)[A-Za-z0-9._~+/-]+/gi,"Bearer [redacted]").slice(0,1400);
+// An AI HTTP success is NOT proof of usable draft work. Reject generic refusals.
+const unusable=s=>/^\s*(?:sorry\b|i\s+(?:cannot|can.t|can not|won.t|am unable)\b|as an ai\b)/i.test(s)||/is there anything else i can help you with\??\s*$/i.test(s);
 async function cycle(env) {
   if(!env.AI||!env.DB) throw Error("bindings_missing");
   // Keep monitoring HOURLY, but spread at most eight inference cycles evenly over 24h.
@@ -33,30 +35,34 @@ async function cycle(env) {
   const handoff=last ? ("Message from "+last.sender+" [UNVERIFIED DRAFT]: "+cap(last.body).slice(0,450)) : "No prior specialist handoff.";
   const supervisor=await env.AI.run(MODEL,{
     messages:[
-      {role:"system",content:"You are Cavalry, a professional zero-budget POD operations supervisor. Assign internal research/draft work only. Do not pretend external actions, store launch, payment or sales have occurred. Max 70 words."},
+      {role:"system",content:"You are Cavalry, a professional POD planning supervisor. Assign a helpful short INTERNAL DRAFT task; creative marketing and research drafts are allowed. Do not actually post, contact buyers or claim external actions, store launch, payment or sales have occurred. Max 70 words."},
       {role:"user",content:"Assign one safe preparatory task to "+role+". Goal: "+goal+". Store evidence: "+BASELINE+". Prior context: "+handoff}
     ],max_tokens:115,temperature:0.2
   });
-  const assigned=cap(supervisor?.response);
+  let assigned=cap(supervisor?.response);
+  if(unusable(assigned)) assigned="Internal, unpublished creative/research task: "+goal+". Produce a useful short DRAFT only. Never assert unverified store actions, production specifications, demand, prices or sales.";
   if(assigned.length<5) throw Error("supervisor_empty");
   const ai=await env.AI.run(MODEL,{
     messages:[
-      {role:"system",content:"You are the "+role+" specialist under Cavalry. Produce a short concrete DRAFT, not verified facts. No outreach, purchases, product publishing, ad purchases, payment modification, fabricated metrics or trademark infringement. Give a useful final instruction to the next specialist "+next+". Max 100 words."},
+      {role:"system",content:"You are the "+role+" specialist under Cavalry. Prepare a practical, unpublished INTERNAL DRAFT, not an external action. Writing benign proposed social copy or reviewing copy is allowed. Avoid false claims, fabricated metrics, copied brands, or statements that products are on sale. The only real collection is Original Abstract Art Gifts. Give a useful next step to "+next+". Max 100 words."},
       {role:"user",content:"Cavalry assignment: "+assigned+". Role brief: "+goal+". "+handoff}
     ],max_tokens:165,temperature:0.35
   });
   const draft=cap(ai?.response);
   if(draft.length<8) throw Error("specialist_empty");
+  const draftStatus=unusable(draft)?"DRAFT_REJECTED":"AI_DRAFT_COMPLETED";
   const ts=new Date().toISOString();
   const wrote=await env.DB.prepare("INSERT INTO cycles(ts,actor,status,model,verified) VALUES(?,?,?,?,0)")
-    .bind(ts,role,"AI_DRAFT_COMPLETED",MODEL).run();
+    .bind(ts,role,draftStatus,MODEL).run();
   const cid=wrote.meta?.last_row_id||0;
+  // Rejected text is not a creative output and must not be handed to the next agent.
+  if(draftStatus==="DRAFT_REJECTED")return {role,next,cycle:cid,status:draftStatus,assignment_delivered:false,specialist_response_saved:false};
   await env.DB.batch([
     env.DB.prepare("INSERT INTO messages(ts,cycle_id,sender,recipient,kind,body,verified) VALUES(?,?,?,?,?,?,0)").bind(ts,cid,"Cavalry",role,"assignment",assigned),
     env.DB.prepare("INSERT INTO messages(ts,cycle_id,sender,recipient,kind,body,verified) VALUES(?,?,?,?,?,?,0)").bind(ts,cid,role,next,"handoff_draft",draft),
     env.DB.prepare("INSERT INTO messages(ts,cycle_id,sender,recipient,kind,body,verified) VALUES(?,?,?,?,?,?,0)").bind(ts,cid,role,"Cavalry","report_draft",draft)
   ]);
-  return {role,next,cycle:cid,assignment_delivered:true,specialist_response_saved:true};
+  return {role,next,cycle:cid,status:draftStatus,assignment_delivered:true,specialist_response_saved:true};
 }
 async function monitoredCycle(env) {
   // Safe heartbeat: prove cron invocation and distinguish AI errors from a missing schedule.
@@ -68,7 +74,7 @@ async function monitoredCycle(env) {
     const result=await cycle(env);
     const role=typeof result==="object" ? result.role : null;
     await env.DB.prepare("UPDATE worker_runs SET status=?,role=? WHERE id=?")
-      .bind(result==="daily_budget_cap"?"SKIPPED_BUDGET":result==="interval_monitor_only"?"SKIPPED_INTERVAL":"SUCCESS",role,rid).run();
+      .bind(result==="daily_budget_cap"?"SKIPPED_BUDGET":result==="interval_monitor_only"?"SKIPPED_INTERVAL":result?.status==="DRAFT_REJECTED"?"REJECTED_DRAFT":"SUCCESS",role,rid).run();
     return result;
   } catch(err) {
     // Record only an error class, never messages, tokens or customer information.
