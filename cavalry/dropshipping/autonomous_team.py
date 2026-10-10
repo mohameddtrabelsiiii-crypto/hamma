@@ -11,6 +11,7 @@ import sqlite3
 import sys
 import urllib.error
 import urllib.request
+from content_guard import review_draft, rejection_notice
 
 HERE = pathlib.Path(__file__).resolve().parent
 RUNTIME = HERE.parent / "runtime"
@@ -117,7 +118,13 @@ def execute(requester=None,db_path=DATABASE,role_override=None):
     # Never expose bank/customer identity. No API/MCP write tools are present in this runner.
     recent=conn.execute("SELECT sender,body FROM messages WHERE recipient IN (?, 'Cavalry') AND id < ? ORDER BY id DESC LIMIT 4",
                         (role,10**15)).fetchall()
-    note="\n".join((r[0]+": "+r[1][:350]) for r in reversed(recent))
+    # Historic unverified drafts may predate the safety gate; never re-feed unsafe claims.
+    notes=[]
+    for sender,body in reversed(recent):
+        flags=review_draft(body,health.get("site_status"),health.get("payout_status"))
+        safe_body=rejection_notice(flags,role) if flags else body[:350]
+        notes.append(sender+": "+safe_body)
+    note="\n".join(notes)
     state=("VERIFIED recent read-only Med Art shop health; "+str(health.get("site_status"))+
            "; payout "+str(health.get("payout_status"))+
            "; offers "+str(health.get("offer_count"))) if fresh else "SHOP AUDIT STALE/UNHEALTHY: no current claims allowed"
@@ -129,6 +136,11 @@ def execute(requester=None,db_path=DATABASE,role_override=None):
     try:
         assignment=talk([{"role":"system","content":"Cavalry is a coordinating AI, not an authorized buyer or merchant."},
                          {"role":"user","content":sup_prompt}],requester=requester)
+        assignment_flags=review_draft(assignment,health.get("site_status"),health.get("payout_status"))
+        if assignment_flags:
+            result["supervisor_assignment_rejected_flags"]=assignment_flags
+            assignment=("INTERNAL DRAFT ONLY: "+DELIVERABLES[role]+
+                        ". Med Art remains prelaunch; no sales CTA, scarcity, medical or verified claims.")
         record(conn,cycle,"Cavalry",role,"assignment",assignment)
         context=("You are "+role.upper()+", an independent specialist in the Med Art POD team reporting to Cavalry. "
                  "Task: "+DELIVERABLES[role]+". Store status: "+state+". "
@@ -138,10 +150,20 @@ def execute(requester=None,db_path=DATABASE,role_override=None):
         reply=talk([{"role":"system","content":context},
                     {"role":"user","content":"Cavalry assignment: "+assignment+"\nPrevious agent messages:\n"+note}],requester=requester)
         next_role=NEXT[role]
-        record(conn,cycle,role,next_role,"handoff_draft",reply)
-        record(conn,cycle,role,"Cavalry","report_draft",reply)
-        result.update(status="two_way_ai_communication_passed",messages_sent=3,
-                      supervisor_assignment=assignment,agent_draft=reply,handed_to=next_role)
+        reply_flags=review_draft(reply,health.get("site_status"),health.get("payout_status"))
+        if reply_flags:
+            # Do not relay hallucinated marketing claims through the mailbox.
+            safe_reply=rejection_notice(reply_flags,next_role)
+            record(conn,cycle,role,next_role,"rejected_handoff_notice",safe_reply)
+            record(conn,cycle,role,"Cavalry","rejected_report_notice",safe_reply)
+            result.update(status="draft_rejected",messages_sent=3,
+                          rejected_flags=reply_flags,supervisor_assignment=assignment,
+                          agent_draft=safe_reply,handed_to=next_role)
+        else:
+            record(conn,cycle,role,next_role,"handoff_draft",reply)
+            record(conn,cycle,role,"Cavalry","report_draft",reply)
+            result.update(status="two_way_ai_communication_passed",messages_sent=3,
+                          supervisor_assignment=assignment,agent_draft=reply,handed_to=next_role)
     except (Exception) as exc:
         # Do not fake agent completions after Ollama errors.
         result.update(status="blocked_inference",error=type(exc).__name__+":"+str(exc)[:180])
@@ -158,4 +180,6 @@ if __name__=="__main__":
     r=execute(role_override=sys.argv[1] if len(sys.argv)>1 else None)
     print(json.dumps({"role":r["role"],"status":r["status"],"sent":r["messages_sent"],
                       "handoff":r.get("handed_to"),"model":r["model"]}))
-    sys.exit(0 if r["status"]=="two_way_ai_communication_passed" else 1)
+    sys.exit(0 if r["status"] in ("two_way_ai_communication_passed","draft_rejected") else 1)
+
+[executed on device: DESKTOP-ADP8R8D (c08082c0-0c59-4745-87d9-daa8ea58fccb)]
