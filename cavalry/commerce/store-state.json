@@ -1,8 +1,8 @@
 {
   "project": "Cavalry Commerce — Med Art",
-  "last_authenticated_store_audit_date": "2026-10-09",
+  "last_authenticated_store_audit_date": "2026-10-10",
   "last_context_review_date": "2026-10-10",
-  "fresh_store_audit_required": true,
+  "fresh_store_audit_required": false,
   "shop": {
     "platform": "Fourthwall",
     "public_url": "https://med-art-shop.fourthwall.com",
@@ -10,36 +10,86 @@
     "payout_at_last_audit": "INACTIVE",
     "live_checkout_verified": false,
     "fulfillment_test_verified": false,
-    "orders_revenue_profit_verified": false
+    "orders_revenue_profit_verified": false,
+    "currency": "USD",
+    "owner_contact_onboarding_required": true,
+    "product_sales_live": false
   },
   "catalog": {
-    "offers_at_last_audit": 1,
+    "offers_at_last_audit": 3,
     "products": [
       {
+        "name": "Night Geometry - Original Abstract Art Mug",
+        "productId": "pro_4v5OfYhyRx62KW5b7Oj6Uw",
+        "offerId": "428cedc6-5a50-4ac6-a0db-04c16257fbbd",
+        "slug": "night-geometry-original-abstract-art-mug",
+        "creation_verified": true,
+        "status": "HIDDEN",
+        "available": false,
+        "fulfilledBy": "FOURTHWALL",
+        "variants": 1,
+        "price_usd": 16.95,
+        "sizes": [
+          "11oz"
+        ],
+        "colors": [
+          "White"
+        ],
+        "qa_note": "Verify thumbnail and real production/shipping/fees before public offer."
+      },
+      {
+        "name": "Contour Flow - Original Abstract Art Tee",
+        "productId": "pro_k66ZW4fsRm6c2def3itltA",
+        "offerId": "fb458dda-5aa8-416a-8978-fc6025dc9490",
+        "slug": "contour-flow-original-abstract-art-tee",
+        "creation_verified": true,
+        "status": "HIDDEN",
+        "available": false,
+        "fulfilledBy": "FOURTHWALL",
+        "variants": 9,
+        "base_price_usd": 22.75,
+        "highest_variant_price_usd": 30.75,
+        "sizes": [
+          "XS",
+          "S",
+          "M",
+          "L",
+          "XL",
+          "2XL",
+          "3XL",
+          "4XL",
+          "5XL"
+        ],
+        "colors": [
+          "Black"
+        ],
+        "qa_note": "Contrast on black fabric, sizes, delivery, returns, fees need QA."
+      },
+      {
         "name": "Orbit Notes - Minimal Art Sticker",
-        "fulfillment": "FOURTHWALL_POD",
+        "productId": "pro_358",
+        "offerId": "ca3d2f32-9532-4f06-9de6-4fe0adcd4739",
         "slug": "orbit-notes-minimal-art-sticker",
         "creation_verified": true,
-        "publishing_at_creation": "UNPUBLISHED",
-        "margin_status": "Fourthwall UI indicated 4 USD gross target; net margin NOT verified"
-      },
-      {
-        "name": "Contour Flow — Abstract Line Art Tee",
-        "creation_verified": false,
-        "art_file_on_pc": "contour-flow-shirt.png",
-        "reference_catalog_product": "Bella+Canvas Unisex Supersoft T-Shirt, white/natural, sizes to confirm"
-      },
-      {
-        "name": "Night Geometry — Modern Abstract Mug",
-        "creation_verified": false,
-        "art_file_on_pc": "night-geometry-mug.png",
-        "reference_catalog_product": "White Glossy Mug 11 oz, sizes to confirm"
+        "status": "HIDDEN",
+        "available": false,
+        "fulfilledBy": "FOURTHWALL",
+        "variants": 1,
+        "price_usd": 6.29,
+        "size": "3\" x 3\"",
+        "colors": [
+          "White"
+        ],
+        "qa_note": "Earlier 8 USD suggested price is obsolete; actual variant price verified at 6.29 USD."
       }
     ],
     "collections": [
       {
         "name": "Original Abstract Art Gifts",
+        "id": "col_EuJCdIEUSY-vzJolhmXGIw",
         "visibility": "HIDDEN",
+        "available": false,
+        "offer_count": 3,
         "verified": true
       }
     ]
@@ -67,12 +117,10 @@
     "create_duplicate_products": false
   },
   "next_steps": [
-    "Reaudit Fourthwall with official OAuth after PC reconnect",
-    "Check existing products before draft writes",
-    "Upload original tee and mug artwork using native managed artwork process and keep new offers unpublished",
-    "Verify pricing, tax, delivery, return policy and checkout before storefront launch",
-    "Receive support clarification, then complete only legal secure merchant onboarding",
-    "Test free local Hermes inference and decide if quality is sufficient",
-    "Run legitimate organic traffic experiments only after brand and compliance checks"
+    "Check the genuine Tunisia-bank Stripe onboarding eligibility reply and initiate official Fourthwall payout signup; leave legal identity and bank verification to rightful account holder when required",
+    "Inspect all three product preview images, margins (including processing, shipping, taxes), descriptions and policy settings",
+    "Keep shop COMING_SOON until active payouts, checkout verification, compliant store policies, and confirmed product readiness",
+    "Confirm local Hermes Cavalry/Ollama inference reliability without paid AI or heavy hardware overload",
+    "Start organic publishing only through authorized channels after product launch gate passes"
   ]
 }
