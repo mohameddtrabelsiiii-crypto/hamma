@@ -40,3 +40,19 @@ None of these previews replace a physical production sample or genuine buyer rev
 6. **Marketing:** prepare and queue authentic original-art content, but do not claim products are purchasable yet.
 
 **Launch gate remains CLOSED** until payouts active, quality warnings addressed, true margin viable, terms/support correct, and checkout verified. No public store or product visibility changes were made in this QA task.
+
+## Live dashboard earning estimates (additional 2026-10-10 QA)
+
+While logged into the official Fourthwall billing and product editors, these values were read directly from the store. They are **platform-displayed per-sale earnings**, not realized post-refund/tax income.
+
+| Product | Verified displayed price | Fourthwall displayed earnings per sale | Customer shipping |
+|---|---:|---:|---|
+| Orbit Notes 3×3 in sticker | $6.29 | $4.00 | Customer pays at checkout |
+| Night Geometry 11oz mug | $16.95 | $11.00 | Customer pays at checkout |
+| Contour Flow base-size tee | $22.75 | $11.00 | Customer pays at checkout |
+
+These figures imply price-minus-displayed-earnings amounts of $2.29, $5.95, and $11.75, respectively, but **do not establish after-tax, after-return, or fully settled net profit**. Larger apparel variants have different prices and require size-specific validation. Actual buyer country shipping, possible processing fees, tax, return loss and payouts still require verification.
+
+### Payout entry-point validation
+
+The official Fourthwall Billing and payouts page shows **$0.00 profit balance** and a **Set up your payouts** button. Clicking it opens Fourthwall's own email confirmation security check before Stripe onboarding. The confirmation was not completed and no identity/bank fields were entered. No bank or payout account was activated. Follow the proper account-owner security process; do not circumvent that check or claim payout readiness. The existing Fourthwall support follow-up asking for specific Tunisia bank/residency eligibility has not received a newer reply at last check.
