@@ -6,13 +6,14 @@ Hermes is installed **on the Windows laptop**, not on GitHub. This branch carrie
 
 - Windows 10 Pro / ASUS X556UV / Core i5-6198DU / 8 GB RAM.
 - Hermes installation and executable present; Hermes gateway running after a controlled restart.
-- Main profile default model set to **qwen2.5:1.5b** and provider **ollama**; backed up previous configuration locally before the change.
+- Main profile default model set to **qwen3.5:0.8b** and provider **ollama**; backed up previous configuration locally before the change.
 - Local Ollama models available: qwen3.5:0.8b and qwen2.5:1.5b.
 - A real Hermes one-shot prompt using local Ollama replied exactly `HERMES_LOCAL_OK` (228 s cold test, too slow for high-throughput service).
-- A direct Ollama test with qwen2.5:1.5b replied exactly `READY`.
+- A direct Ollama test with qwen2.5:1.5b replied exactly `READY`, but Hermes rejects that model due to its 32,768-token context window (Hermes requires at least 64K); it is not the default.
+- Qwen3.5:0.8b advertises a 262,144-token context window and passed the clean Hermes one-shot test. A subsequent full default-profile one-shot stalled during startup and was stopped; unrestricted full-profile task execution remains **not verified**.
 - One hourly **Cavalry MedArt Read-only Health** cron job was active, with last run status `ok` (not evidence of store sales).
 - Windows timezone corrected to UTC+1 for Tunisia.
-- Gateway service already installed; laptop must stay awake and connected for local automation.
+- Gateway service installed and restarted on the Qwen3.5 config (new process verified); local health-check reported `core_ready: true`. The laptop must stay awake and connected for automation.
 
 ## Verify locally
 
@@ -28,9 +29,9 @@ $hermes = Join-Path $env:LOCALAPPDATA 'hermes\bin\hermes.exe'
 
 ## Known limits and unfinished integrations
 
-- Only the local model connection has been tested; `qwen2.5:1.5b` is a small model and **not sufficient evidence of reliable complex autonomous business operations**.
+- Only the local model connection has been tested; `qwen3.5:0.8b` is a very small model and **not sufficient evidence of reliable complex autonomous business operations**.
 - Laptop resources are tight for simultaneous browser/video/agent workloads.
-- The default paid Anthropic model was replaced to avoid reliance on unverified paid inference credentials; no chargeable AI provider was activated.
+- The default paid Anthropic model was replaced with a local model to avoid reliance on unverified paid inference credentials; no chargeable AI provider was activated.
 - The doctor reported upstream JavaScript build-time dependency advisories and optional tools not installed, including agent-browser.
 - Historical Fourthwall MCP OAuth/reconnection errors need separate provider-level validation. Business payment, order fulfillment, publication, and outbound communication are **not** verified end-to-end.
 - No messaging platform is configured, so the gateway currently runs chiefly for cron/automation rather than incoming chat messages.
