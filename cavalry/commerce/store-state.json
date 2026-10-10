@@ -19,7 +19,9 @@
     "fourthwall_subscription_used_offers": 3,
     "custom_shipping_flat_rates_enabled": false,
     "custom_shipping_profiles_enabled": false,
-    "profit_costs_verified": false
+    "profit_costs_verified": false,
+    "payout_setup_flow_verified_2026_10_10": true,
+    "platform_display_earnings_are_not_verified_net_profit": true
   },
   "catalog": {
     "offers_at_last_audit": 3,
@@ -41,7 +43,10 @@
         "colors": [
           "White"
         ],
-        "qa_note": "Verify thumbnail and real production/shipping/fees before public offer."
+        "qa_note": "Verify thumbnail and real production/shipping/fees before public offer.",
+        "fourthwall_display_earnings_usd": 11,
+        "fourthwall_display_earnings_verified_2026_10_10": true,
+        "customer_shipping_paid_at_checkout": true
       },
       {
         "name": "Contour Flow - Original Abstract Art Tee",
@@ -69,7 +74,10 @@
         "colors": [
           "Black"
         ],
-        "qa_note": "Contrast on black fabric, sizes, delivery, returns, fees need QA."
+        "qa_note": "Contrast on black fabric, sizes, delivery, returns, fees need QA.",
+        "base_size_display_earnings_usd": 11,
+        "fourthwall_display_earnings_verified_2026_10_10": true,
+        "customer_shipping_paid_at_checkout": true
       },
       {
         "name": "Orbit Notes - Minimal Art Sticker",
@@ -86,7 +94,10 @@
         "colors": [
           "White"
         ],
-        "qa_note": "Earlier 8 USD suggested price is obsolete; actual variant price verified at 6.29 USD."
+        "qa_note": "Earlier 8 USD suggested price is obsolete; actual variant price verified at 6.29 USD.",
+        "fourthwall_display_earnings_usd": 4,
+        "fourthwall_display_earnings_verified_2026_10_10": true,
+        "customer_shipping_paid_at_checkout": true
       }
     ],
     "collections": [
@@ -107,7 +118,8 @@
     "support_statement_received": "2026-10-09",
     "support_claim": "Tunisia payout eligible through Fourthwall Stripe flow",
     "unresolved_issue": "Genuine Tunisia-resident owner and Tunisia-bank Stripe Connect onboarding not independently validated; clarification requested",
-    "onboarding_completed": false
+    "onboarding_completed": false,
+    "secure_email_confirmation_required_before_stripe_flow": true
   },
   "automation": {
     "local_hermes_profile": "cavalry",
