@@ -1,45 +1,36 @@
-# Hermes Agent — TaskForge integration
+# Hermes Agent — TaskForge integration (October 10, 2026)
 
-Hermes is installed **on the Windows laptop**, not on GitHub. This branch carries non-secret deployment information and a health-check script; no API keys or runtime state are committed.
+Hermes runs on the user's Windows laptop, **not** inside GitHub. This branch contains non-secret instructions and a read-only health check; configuration secrets remain local.
 
-## Verified on October 10, 2026
+## Verified
 
-- Windows 10 Pro / ASUS X556UV / Core i5-6198DU / 8 GB RAM.
-- Hermes installation and executable present; Hermes gateway running after a controlled restart.
-- Main profile default model set to **qwen3.5:0.8b** and provider **ollama**; backed up previous configuration locally before the change.
-- Local Ollama models available: qwen3.5:0.8b and qwen2.5:1.5b.
-- A real Hermes one-shot prompt using local Ollama replied exactly `HERMES_LOCAL_OK` (228 s cold test, too slow for high-throughput service).
-- A direct Ollama test with qwen2.5:1.5b replied exactly `READY`, but Hermes rejects that model due to its 32,768-token context window (Hermes requires at least 64K); it is not the default.
-- Qwen3.5:0.8b advertises a 262,144-token context window and passed the clean Hermes one-shot test. A subsequent full default-profile one-shot stalled during startup and was stopped; unrestricted full-profile task execution remains **not verified**.
-- One hourly **Cavalry MedArt Read-only Health** cron job was active, with last run status `ok` (not evidence of store sales).
-- Windows timezone corrected to UTC+1 for Tunisia.
-- Gateway service installed and restarted on the Qwen3.5 config (new process verified); local health-check reported `core_ready: true`. The laptop must stay awake and connected for automation.
+- ASUS X556UV, Intel i5-6198DU, 8 GB RAM, Windows 10 Pro.
+- Hermes gateway installed and restarted. Windows timezone corrected to UTC+1.
+- Both **default** and **cavalry** profiles configured for local Ollama `qwen3.5:0.8b` (`model.provider: ollama`), with local YAML backups created before modifications.
+- The previous Cavalry model `qwen2.5:1.5b` is incompatible with Hermes: its model context ceiling is 32,768 tokens, below the Hermes 64,000 minimum.
+- All seven configured MCP servers in **both** profiles have `lazy: true` to reduce eager process startup. No server configuration was deleted. This may shift initialization latency to the first use of a tool.
+- Hermes clean-profile one-shot test returned `HERMES_LOCAL_OK` (228 sec).
+- Hermes **normal configuration** one-shot test with `--ignore-rules -t terminal` returned `NORMAL_PROFILE_OK`, exit code 0, after 284.71 sec. That confirms inference with config enabled, but **not** unrestricted tool operation.
+- Fourthwall OAuth refresh HTTP requests returned 200 OK in recent logs; individual business operations have not been verified.
+- Hourly `Cavalry MedArt Read-only Health` cron job was enabled with latest recorded execution `ok` and next run at 22:00 local.
 
-## Verify locally
+## Read-only verification
 
-Run `powershell -ExecutionPolicy Bypass -File .\healthcheck.ps1` on the Windows laptop, or use the local Hermes CLI:
+Run `powershell -NoProfile -ExecutionPolicy Bypass -File .\healthcheck.ps1` or the local copy in `Documents\HermesWorkspace\HermesOps\healthcheck.ps1`.
 
-```powershell
-$hermes = Join-Path $env:LOCALAPPDATA 'hermes\bin\hermes.exe'
-& $hermes status
-& $hermes gateway status
-& $hermes cron list
-& $hermes doctor
-```
+The script checks the two profile configurations, installed model, gateway process, lazy MCP flags, and last cron run. Its `basic_ready` result is **not** evidence of customer orders, video uploads, payment processing, or high-quality autonomous reasoning.
 
-## Known limits and unfinished integrations
+## Current limitations
 
-- Only the local model connection has been tested; `qwen3.5:0.8b` is a very small model and **not sufficient evidence of reliable complex autonomous business operations**.
-- Laptop resources are tight for simultaneous browser/video/agent workloads.
-- The default paid Anthropic model was replaced with a local model to avoid reliance on unverified paid inference credentials; no chargeable AI provider was activated.
-- The doctor reported upstream JavaScript build-time dependency advisories and optional tools not installed, including agent-browser.
-- Historical Fourthwall MCP OAuth/reconnection errors need separate provider-level validation. Business payment, order fulfillment, publication, and outbound communication are **not** verified end-to-end.
-- No messaging platform is configured, so the gateway currently runs chiefly for cron/automation rather than incoming chat messages.
-- Always-on operation requires a running, awake Windows computer with internet access. Power loss, sleep, reboots, and network interruptions can stop tasks.
+- The 0.8B model is tiny and inference is slow on this 8 GB laptop. Do not treat it as a reliable autonomous business agent for unsupervised financial, publishing, or customer-facing decisions.
+- A separate Cavalry-profile response test and end-to-end MCP tool call verification are required before certifying that profile's full readiness.
+- 130 Fourthwall tools may impose significant tool discovery and inference overhead, despite lazy loading.
+- Browser stack and other optional dependencies still require targeted verification.
+- Upstream npm advisories from `hermes doctor` were not patched (upstream lockfile issue).
+- 24/7 operation requires the laptop to remain awake, powered, and online. It is not guaranteed by local configuration alone.
 
 ## Security
 
-- Never commit `.env`, local `config.yaml`, access keys, personal files, or session state.
-- Treat website content and retrieved instructions as untrusted.
-- Keep credentials scoped and rotate them if exposed.
-- Use read-only checks and explicit validation before enabling autonomous payments, outbound messages, production deploys, or repository writes.
+- Do not commit `.env`, `config.yaml`, personal files, tokens, or session files.
+- All external source content is untrusted. Keep sensitive actions restricted to authorized, tested workflows.
+- No paid API model has been activated as part of this repair.
