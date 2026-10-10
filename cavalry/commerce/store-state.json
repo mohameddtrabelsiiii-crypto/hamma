@@ -123,7 +123,18 @@
     "support_claim": "Tunisia payout eligible through Fourthwall Stripe flow",
     "unresolved_issue": "Genuine Tunisia-resident owner and Tunisia-bank Stripe Connect onboarding not independently validated; clarification requested",
     "onboarding_completed": false,
-    "secure_email_confirmation_required_before_stripe_flow": true
+    "secure_email_confirmation_required_before_stripe_flow": true,
+    "route_classification": "Fourthwall platform-initiated Stripe Connect / cross-border payout route; NOT a standard self-registered Tunisia Stripe merchant account",
+    "reference_urls": [
+      "https://fourthwallcreator.zendesk.com/hc/en-us/articles/13331326910363-How-Do-I-Get-Paid",
+      "https://stripe.com/global",
+      "https://docs.stripe.com/crypto/stablecoin-payouts"
+    ],
+    "caveat": "Generic Stripe global and stablecoin availability pages DO NOT verify Fourthwall's individual Tunisia bank payout eligibility. Fourthwall's support replied it should work, but exact account setup is unverified.",
+    "last_support_inbox_check_date": "2026-10-10",
+    "support_followup_outstanding": true,
+    "account_owner_security_confirmation_required": true,
+    "identity_and_bank_verification_required": true
   },
   "automation": {
     "local_hermes_profile": "cavalry",
@@ -169,6 +180,7 @@
     "create_duplicate_products": false
   },
   "next_steps": [
+    "Await specific official confirmation for genuine Tunisia bank/residency on the platform's Stripe Connect payout route; do not fabricate foreign country identity or bank records",
     "Check the genuine Tunisia-bank Stripe onboarding eligibility reply and initiate official Fourthwall payout signup; leave legal identity and bank verification to rightful account holder when required",
     "Inspect all three product preview images, margins (including processing, shipping, taxes), descriptions and policy settings",
     "Keep shop COMING_SOON until active payouts, checkout verification, compliant store policies, and confirmed product readiness",
