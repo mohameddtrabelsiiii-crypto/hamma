@@ -10,7 +10,8 @@ const FEES=Object.freeze({
   international_paypal:{variable:0.0499,fixed:0.49}
 });
 const MONEY=['retail','production','shippingCollected','shippingPaidByMerchant',
- 'taxCollected','discount','platformFees','fxFees','expectedSupportAndReturns','paidAcquisition'];
+ 'taxCollected','discount','platformFees','fxFees','expectedSupportAndReturns','paidAcquisition',
+ 'cashRequiredBeforeSettlement'];
 const round=n=>Math.round((n+Number.EPSILON)*100)/100;
 const valid=n=>Number.isFinite(n)&&n>=0;
 export const paymentFees=FEES;
@@ -18,13 +19,20 @@ export function calculateContribution(input){
   const market=input?.market||'unknown',currency=input?.currency||'USD';
   const method=input?.paymentMethod||'domestic_card';
   if(!FEES[method])throw Error('unknown_payment_method');
+  // Fourthwall's quoted fixed processing amounts here are USD. Never silently
+  // reuse a 30-cent USD charge as 0.30 TND/EUR/GBP on a non-USD transaction.
+  if(!/^[A-Z]{3}$/.test(currency))throw Error('invalid_currency');
   const missing=MONEY.filter(k=>!valid(input?.[k]));
+  if(currency!=='USD'&&!valid(input?.processorFixedFeeInCurrency)){
+    missing.push('processorFixedFeeInCurrency');
+  }
   if(missing.length)return {status:'NEEDS_VERIFICATION',market,currency,missing,
     note:'Required unit economics unknown. Do not claim profit or margins.'};
   const discountedRetail=input.retail-input.discount;
   if(discountedRetail<0)throw Error('discount_exceeds_retail');
   const customerTotal=discountedRetail+input.shippingCollected+input.taxCollected;
-  const processing=customerTotal*FEES[method].variable+FEES[method].fixed;
+  const processing=customerTotal*FEES[method].variable+
+    (currency==='USD'?FEES[method].fixed:input.processorFixedFeeInCurrency);
   const profit=discountedRetail+input.shippingCollected-input.production-
     input.shippingPaidByMerchant-processing-input.platformFees-input.fxFees-
     input.expectedSupportAndReturns-input.paidAcquisition;
