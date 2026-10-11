@@ -1,0 +1,21 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "cavalry-free-hub",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-11",
+  "workers_dev": true,
+  "observability": { "enabled": true, "head_sampling_rate": 0.05 },
+  "kv_namespaces": [{ "binding": "CONFIG", "id": "9aeed2a51ecc441dae860642723ee492" }],
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "taskforge_operations",
+    "database_id": "ccfd7c8f-a6f1-46cf-9b34-750d71fa4dd1"
+  }],
+  "queues": {
+    "producers": [{ "binding": "JOBS", "queue": "taskforge-jobs" }],
+    "consumers": [{ "queue": "taskforge-jobs", "max_batch_size": 1, "max_retries": 2, "max_batch_timeout": 1 }]
+  },
+  "vectorize": [{ "binding": "KNOWLEDGE", "index_name": "cavalry-knowledge" }],
+  "ai": { "binding": "AI" },
+  "triggers": { "crons": ["0 */6 * * *"] }
+}
