@@ -19,3 +19,12 @@ test("Demo and assessment routes remain accessible without paid or fabricated in
   const r=await request(path);assert.equal(r.status,200,path);
  }
 });
+
+test("Phase 2 hero presents illustrative robot and responsive workflow panels without fake proof",async()=>{
+ const r=await request("/");assert.equal(r.status,200);const html=await r.text();
+ for(const marker of ['class="hero tf-hero tf-hero-v2"','class="tf-robot"','class="tf-overlay tf-overlay--right"','class="tf-overlay tf-overlay--top"','href="/automation/demo"','CONCEPT ART','not a live','id="order"','id="result-form"'])
+   assert.ok(html.toLowerCase().includes(marker.toLowerCase()),"Missing "+marker);
+ assert.ok(html.includes("overflow-x:clip"),"Mobile overflow must be clipped");
+ assert.ok(html.includes("prefers-reduced-motion"),"Animation must respect reduced-motion preferences");
+ assert.ok(html.includes("AI robot representing TaskForge technology, not a live deployed agent"));
+});
