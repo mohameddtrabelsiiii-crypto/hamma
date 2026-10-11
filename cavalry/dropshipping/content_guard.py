@@ -14,7 +14,7 @@ RULES = (
     ("unsupported_reputation", r"\b(?:bestseller|best[- ]seller|5[- ]star\s+reviews?|thousands\s+of\s+(?:happy\s+)?customers)\b"),
     ("unsupported_delivery", r"\b(?:guaranteed\s+delivery|ships?\s+tomorrow|free\s+overnight\s+shipping)\b"),
 )
-PRELAUNCH_SALES = r"\b(?:shop\s+now|buy\s+now|order\s+now|checkout\s+now|click\s+to\s+buy|available\s+to\s+order|on\s+sale\s+now)\b"
+PRELAUNCH_SALES = r"\b(?:shop\s+now|buy\s+(?:now|today)|order\s+(?:now|today)|purchase\s+(?:now|today)|add\s+to\s+cart|checkout\s+now|check\s+out\s+now|click\s+to\s+buy|available\s+to\s+order|ready\s+to\s+order|on\s+sale\s+now)\b"
 
 
 def review_draft(text, site_status="COMING_SOON", payout_status="INACTIVE"):
@@ -48,5 +48,3 @@ if __name__ == "__main__":
         flags=review_draft(sample)
         assert bool(flags) == should_reject, (sample,flags)
     print("CAVALRY_GUARD_SELFTEST_OK")
-
-[executed on device: DESKTOP-ADP8R8D (c08082c0-0c59-4745-87d9-daa8ea58fccb)]
