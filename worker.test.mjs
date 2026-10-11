@@ -275,7 +275,7 @@ test('free page analytics are restricted to marketing pages, not local-only demo
   assert.equal(response.status,200);
   const html=await response.text();
   assert.ok(html.includes('static.cloudflareinsights.com/beacon.min.js'));
-  assert.ok(html.includes('Privacy-friendly page performance analytics'));
+  assert.ok(html.includes('Analytics on marketing pages only.'));
   assert.match(response.headers.get('content-security-policy'),/cloudflareinsights.com/);
  }
  for(const path of ['/automation/demo','/automation/leadops']){
@@ -305,7 +305,7 @@ test('quick CSV quote landing captures buyer requests using existing validated l
  const legacy=await w(new Request('https://taskforge.example/services/pdf-to-excel'));
  assert.equal(legacy.status,200);
  assert.doesNotMatch(await legacy.text(),/id="csv-quote"/);
- assert.match(legacy.headers.get('content-security-policy'),/form-action 'none'/);
+ assert.match(legacy.headers.get('content-security-policy'),/form-action 'self'/);
  assert.equal((await w(new Request('https://taskforge.example/services/quick-csv-fix',{method:'POST'}))).status,405);
 });
 
@@ -338,13 +338,13 @@ test('restaurant inventory landing uses fictional proof, clear scope and safe in
   assert.ok(page.toLowerCase().includes(term.toLowerCase()),term);
  }
  assert.match(page,/href='\/automation#b2b-lead'/);
- assert.match(page,/sales\/restaurant-inventory-demo/);
+ assert.match(page,/\/examples#restaurant/);
  assert.equal((await w(new Request(url,{method:'POST'}))).status,405);
  const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
  assert.match(sitemap,/\/services\/restaurant-stock-dashboard/);
  const home=await (await w(new Request('https://taskforge.example/'))).text();
  assert.match(home,/\/services\/restaurant-stock-dashboard/);
- assert.match(response.headers.get('content-security-policy'),/form-action 'none'/);
+ assert.match(response.headers.get('content-security-policy'),/form-action 'self'/);
 });
 
 test('Excel consolidation bilingual landing makes a genuine validated lead offer',async()=>{
@@ -357,7 +357,7 @@ test('Excel consolidation bilingual landing makes a genuine validated lead offer
   assert.ok(html.includes(phrase),phrase);
  }
  assert.match(html,/id="csv-quote"/);
- assert.match(html,/href='https:\/\/github.com\/mohameddtrabelsiiii-crypto\/hamma/);
+ assert.match(html,/\/examples#consolidation/);
  assert.match(page.headers.get('content-security-policy'),/connect-src 'self'/);
  assert.match(page.headers.get('content-security-policy'),/form-action 'self'/);
  const embedded=html.match(/<script>([\s\S]*?)<\/script>/);
@@ -414,4 +414,61 @@ test('home and B2B navigation link to inventory pilot and safe browser demonstra
   assert.ok(html.includes('href="/automation/inventory-reservations"'));
   assert.ok(html.includes('href="/services/inventory-reservation-audit"'));
  }
+});
+
+test('every scoped service has a free contact path and no misleading immediate checkout',async()=>{
+ const w=worker();
+ for(const path of ['/services/inventory-reservation-audit','/services/rfq-catalogue-check','/services/restaurant-stock-dashboard','/services/pdf-to-excel','/services/company-list']){
+  const response=await w(new Request('https://taskforge.example'+path));
+  assert.equal(response.status,200);
+  assert.match(response.headers.get('content-security-policy'),/connect-src 'self'/);
+  const html=await response.text();
+  assert.match(html,/id="tf-scope-form"/);
+  assert.match(html,/No automatic checkout is offered for unpriced requests/);
+  assert.match(html,/href="\/contact"/);
+  const inline=html.match(/<script>([\s\S]*?)<\/script>/);
+  assert.ok(inline);new vm.Script(inline[1]);
+ }
+ const quick=await (await w(new Request('https://taskforge.example/services/quick-csv-fix'))).text();
+ assert.match(quick,/id="csv-quote"/);
+ assert.doesNotMatch(quick,/id="tf-scope-form"/);
+});
+test('contact and project workflow information are public, indexed and protect POST',async()=>{
+ const w=worker();
+ for(const path of ['/contact','/how-it-works','/privacy']){
+  const res=await w(new Request('https://taskforge.example'+path));
+  assert.equal(res.status,200);
+  assert.match(await res.text(),/TaskForge AI/);
+  const head=await w(new Request('https://taskforge.example'+path,{method:'HEAD'}));
+  assert.equal(head.status,200);assert.equal(await head.text(),'');
+  assert.equal((await w(new Request('https://taskforge.example'+path,{method:'POST'}))).status,405);
+ }
+ const contact=await (await w(new Request('https://taskforge.example/contact'))).text();
+ assert.match(contact,/id="tf-scope-form"/);
+ assert.match(contact,/We do not send an automatic confirmation email/);
+ const scripts=[...contact.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+ assert.equal(scripts.length,1);new vm.Script(scripts[0][1]);
+ const process=await (await w(new Request('https://taskforge.example/how-it-works'))).text();
+ assert.match(process,/Custom quote|custom quote|Feasibility and quote/);
+ const privacy=await (await w(new Request('https://taskforge.example/privacy'))).text();
+ assert.match(privacy,/Supabase/);
+ const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ for(const p of ['/contact','/privacy','/how-it-works'])assert.ok(sitemap.includes('taskforge.example'+p)===false && sitemap.includes('taskforge-ai.pages.dev'+p));
+});
+
+test('public portfolio does not expose personal GitHub username or claim paid history',async()=>{
+ const w=worker();
+ for(const path of ['/examples','/services/excel-consolidation','/services/restaurant-stock-dashboard']){
+  const r=await w(new Request('https://taskforge.example'+path));
+  assert.equal(r.status,200);const html=await r.text();
+  assert.doesNotMatch(html,/mohameddtrabelsiiii-crypto/);
+ }
+ const demo=await (await w(new Request('https://taskforge.example/examples'))).text();
+ assert.match(demo,/fictional or synthetic data/);
+ assert.match(demo,/href="\/automation\/inventory-reservations"/);
+ assert.match(demo,/id="restaurant"/);
+ const sheet=await (await w(new Request('https://taskforge.example/services/excel-consolidation'))).text();
+ assert.match(sheet,/\/examples#consolidation/);
+ const s=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ assert.match(s,/\/examples/);
 });
