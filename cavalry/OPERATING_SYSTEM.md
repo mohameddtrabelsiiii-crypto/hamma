@@ -3,6 +3,8 @@
 ## Current commercial priority: TaskForge AI (2026-10-11)
 Read and follow [`TASKFORGE_GROWTH_MANDATE_2026-10-11.md`](TASKFORGE_GROWTH_MANDATE_2026-10-11.md) for high-value B2B services, the $10k/month operating-profit six-month **stretch** and $1M annualized revenue run-rate **moonshot**. Treat both as targets, not forecasts, and prove each handoff, payment, customer, cost and delivery independently. Start with qualified real leads and verified paid pilots, not website polish or fabricated scale. Existing commerce safety rules continue unchanged.
 
+**Fair first-client pricing (2026-10-11):** Read [`TASKFORGE_FINANCIAL_FOUNDATION_AND_PRICING_2026-10-11.md`](TASKFORGE_FINANCIAL_FOUNDATION_AND_PRICING_2026-10-11.md) before quoting. Start with low-risk, bounded work ($89–$149 small CSV, $249–$499 CRM CSV review, $349–$749 RFQ precheck, $599–$1,200 narrow prototype, with individually reviewed feasibility). These are internal budget hypotheses, not automatic charges or proof of market demand. Estimate real hours and direct expenses and defend a sustainable contribution margin. Do not promise production integrations at prototype prices or lift the checkout safety gate.
+
 ## Mission
 Build revenue-producing digital services with $0 incremental software spend.
 
