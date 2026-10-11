@@ -13,6 +13,8 @@ RULES = (
     ("unverified_artist_origin", r"\b(?:support\s+local\s+artists|handmade\s+by\s+local\s+artists|certified\s+local\s+artists)\b"),
     ("unsupported_reputation", r"\b(?:bestseller|best[- ]seller|5[- ]star\s+reviews?|thousands\s+of\s+(?:happy\s+)?customers)\b"),
     ("unsupported_delivery", r"\b(?:guaranteed\s+delivery|ships?\s+tomorrow|free\s+overnight\s+shipping)\b"),
+    # Until verified variant costs and fees exist, no agent may invent a margin equation.
+    ("unverified_margin_formula", r"\b(?:net\s+contribution|net\s+profit|profit\s+margin)\s*(?:=|:)\s*[^\r\n]{0,160}[+\-*/×÷]"),
 )
 PRELAUNCH_SALES = r"\b(?:shop\s+now|buy\s+(?:now|today)|order\s+(?:now|today)|purchase\s+(?:now|today)|add\s+to\s+cart|checkout\s+now|check\s+out\s+now|click\s+to\s+buy|available\s+to\s+order|ready\s+to\s+order|on\s+sale\s+now)\b"
 
