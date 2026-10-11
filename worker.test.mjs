@@ -404,3 +404,14 @@ test('inventory reservation browser-only proof protects committed stock and reje
  assert.match(sitemap,/automation\/inventory-reservations/);
  assert.match(sitemap,/services\/inventory-reservation-audit/);
 });
+
+test('home and B2B navigation link to inventory pilot and safe browser demonstration',async()=>{
+ const w=worker();
+ for(const path of ['/','/automation']){
+  const res=await w(new Request('https://taskforge.example'+path));
+  assert.equal(res.status,200);
+  const html=await res.text();
+  assert.ok(html.includes('href="/automation/inventory-reservations"'));
+  assert.ok(html.includes('href="/services/inventory-reservation-audit"'));
+ }
+});
