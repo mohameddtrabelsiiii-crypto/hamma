@@ -1,0 +1,20 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "cavalry-durable-control",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-11",
+  "workers_dev": false,
+  "d1_databases": [{
+    "binding": "DB", "database_name": "taskforge_operations",
+    "database_id": "ccfd7c8f-a6f1-46cf-9b34-750d71fa4dd1"
+  }],
+  "durable_objects": { "bindings": [{ "name": "STATE", "class_name": "CavalryState" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["CavalryState"] }],
+  "workflows": [{
+    "name": "cavalry-daily-workflow",
+    "binding": "CONTROL_WORKFLOW",
+    "class_name": "CavalryDailyWorkflow",
+    "limits": { "steps": 10 }
+  }],
+  "triggers": { "crons": ["15 1 * * *"] }
+}
