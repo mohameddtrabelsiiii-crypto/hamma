@@ -28,7 +28,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
 
-  const secret = Deno.env.get("WHOP_WEBHOOK_SECRET");
+  const secret = Deno.env.get("WHOP_WEBHOOK_SECRET")?.trim();
   if (!secret) return json({ error: "Whop webhook is not configured yet." }, 503);
 
   try {
@@ -66,8 +66,21 @@ Deno.serve(async (req: Request) => {
       ""
     ).trim();
 
+    // New Whop checkout configurations attach metadata.order_id, not only a reference.
+    // Match by server-generated UUID; never rely on browser-supplied identity.
+    const metadataOrderId = metadata?.order_id;
     let order: any = null;
-    if (orderReference) {
+    if (typeof metadataOrderId === "string" &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(metadataOrderId)) {
+      const { data } = await supabase
+        .from("orders")
+        .select("id,reference,status,amount_tnd,whop_checkout_id")
+        .eq("id", metadataOrderId)
+        .maybeSingle();
+      order = data;
+    }
+    // Legacy compatibility: only use reference when order_id is absent.
+    if (!order && !metadataOrderId && orderReference) {
       const { data } = await supabase
         .from("orders")
         .select("id,reference,status,amount_tnd,whop_checkout_id")
@@ -113,12 +126,15 @@ Deno.serve(async (req: Request) => {
       // Never release work for an unpriced order, wrong currency, or unmatched checkout.
       const expected = Number(order.amount_tnd);
       const total = Number(eventData?.total);
-      const checkoutId = dig(eventData, ["checkout_id", "checkout.id"]);
+      const checkoutId = dig(eventData, ["checkout_configuration_id", "checkout_configuration.id", "checkout_id", "checkout.id"]);
+      const companyId = dig(eventData, ["company.id", "company_id"]);
+      const expectedCompanyId = Deno.env.get("WHOP_COMPANY_ID");
       if (!order.amount_tnd || !Number.isFinite(expected) || expected <= 0 ||
           eventData?.total == null || !Number.isFinite(total) ||
           Math.abs(total - expected) > 0.000001 ||
           String(eventData?.currency ?? "").toLowerCase() !== "tnd" ||
-          !paymentId || !order.whop_checkout_id || checkoutId !== order.whop_checkout_id) {
+          !paymentId || !order.whop_checkout_id || checkoutId !== order.whop_checkout_id ||
+          (expectedCompanyId && companyId !== expectedCompanyId)) {
         return json({ ok: true, needs_review: true });
       }
       const { error: paymentError } = await supabase
@@ -127,8 +143,8 @@ Deno.serve(async (req: Request) => {
           status: "paid",
           payment_confirmed_at: new Date().toISOString(),
           whop_payment_id: paymentId ? String(paymentId) : null,
-          whop_customer_id: dig(eventData, ["user_id", "customer_id", "member_id"]) ? String(dig(eventData, ["user_id", "customer_id", "member_id"])) : null,
-          whop_checkout_id: dig(eventData, ["checkout_id", "checkout.id"]) ? String(dig(eventData, ["checkout_id", "checkout.id"])) : null
+          whop_customer_id: dig(eventData, ["user.id", "user_id", "customer_id", "member_id"]) ? String(dig(eventData, ["user.id", "user_id", "customer_id", "member_id"])) : null,
+          whop_checkout_id: checkoutId ? String(checkoutId) : null
         })
         .eq("id", order.id)
         .in("status", ["awaiting_payment", "paid"]);
