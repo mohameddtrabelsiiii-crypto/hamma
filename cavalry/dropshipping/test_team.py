@@ -31,5 +31,24 @@ class TeamTests(unittest.TestCase):
                 self.assertFalse(data["ai_model_connected"])
                 self.assertTrue((t.RUNTIME/"latest-team-cycle.json").exists())
             finally:t.RUNTIME=orig
+    def test_three_hidden_offers_never_unlock_launch(self):
+        # A fresh shop audit and offer_count=3 do not prove any offer is sellable.
+        orig=t.RUNTIME
+        with tempfile.TemporaryDirectory() as tmp:
+            t.RUNTIME=pathlib.Path(tmp)
+            try:
+                for site,payout in (("COMING_SOON","INACTIVE"),("LIVE","ACTIVE")):
+                    health={"checked_at_utc":dt.datetime.now(dt.timezone.utc).isoformat(),
+                            "health":"ok","shop":"Med Art","site_status":site,
+                            "payout_status":payout,"offer_count":3}
+                    (t.RUNTIME/"latest-store-health.json").write_text(
+                        json.dumps(health),encoding="utf-8")
+                    data=t.run()
+                    self.assertTrue(data["audit_is_fresh"])
+                    self.assertEqual(data["offer_count"],3)
+                    self.assertFalse(data["launch_gates"]["three_sellable_pod_listings"])
+                    self.assertFalse(data["launch_ready"])
+                    self.assertEqual(data["external_actions"],0)
+            finally:t.RUNTIME=orig
 
 if __name__=="__main__":unittest.main()
