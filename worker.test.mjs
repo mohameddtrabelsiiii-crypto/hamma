@@ -369,3 +369,38 @@ test('Excel consolidation bilingual landing makes a genuine validated lead offer
  const homepage=await (await w(new Request('https://taskforge.example/'))).text();
  assert.ok(homepage.includes('href="\/services\/excel-consolidation"'));
 });
+
+
+test('inventory reservation browser-only proof protects committed stock and rejects malformed inputs',async()=>{
+ const w=worker();
+ const r=await w(new Request('https://taskforge.example/automation/inventory-reservations'));
+ assert.equal(r.status,200);
+ assert.match(r.headers.get('content-security-policy'),/connect-src 'none'/);
+ const html=await r.text();
+ assert.match(html,/Fictional data only/);
+ assert.match(html,/Request a scoped B2B pilot/);
+ const script=html.match(/<script>([\s\S]*?)<\/script>/)[1];
+ const context={document:{getElementById:()=>({addEventListener(){}})}};
+ vm.runInNewContext(script,context);
+ const supplies=[{id:'LOCAL',sku:'A100',available:3,reserved:1,readyInDays:0,priority:1},{id:'DC',sku:'A100',available:4,reserved:0,readyInDays:2,priority:2},{id:'OTW',sku:'A100',available:5,reserved:0,readyInDays:10,priority:3}];
+ const orders=[{id:'SO1',sku:'A100',qty:4,dueInDays:3,confirmed:true},{id:'SO2',sku:'A100',qty:4,dueInDays:4,confirmed:true},{id:'Q1',sku:'A100',qty:3,dueInDays:2,confirmed:false}];
+ const result=context.planInventory(supplies,orders);
+ const byId=Object.fromEntries(result.map(x=>[x.id,x]));
+ assert.equal(byId.SO1.shortage,0);
+ assert.deepEqual(Array.from(byId.SO1.allocations),['LOCAL: 2','DC: 2']);
+ assert.equal(byId.SO2.shortage,2);
+ assert.deepEqual(Array.from(byId.SO2.allocations),['DC: 2']);
+ assert.equal(byId.Q1.shortage,null);
+ assert.equal(byId.Q1.allocations.length,0);
+ assert.throws(()=>context.planInventory([{...supplies[0],reserved:4}],orders),/Invalid supply/);
+ assert.throws(()=>context.planInventory([supplies[0],{...supplies[0]}],orders),/Invalid supply/);
+ const page=await w(new Request('https://taskforge.example/services/inventory-reservation-audit'));
+ assert.equal(page.status,200);
+ assert.match(await page.text(),/Try the fictional browser-only allocation demo/);
+ assert.equal((await w(new Request('https://taskforge.example/automation/inventory-reservations',{method:'POST'}))).status,405);
+ const head=await w(new Request('https://taskforge.example/automation/inventory-reservations',{method:'HEAD'}));
+ assert.equal(head.status,200);assert.equal(await head.text(),'');
+ const sitemap=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
+ assert.match(sitemap,/automation\/inventory-reservations/);
+ assert.match(sitemap,/services\/inventory-reservation-audit/);
+});
