@@ -1,5 +1,8 @@
 # Cavalry Operating System
 
+## Current commercial priority: TaskForge AI (2026-10-11)
+Read and follow [`TASKFORGE_GROWTH_MANDATE_2026-10-11.md`](TASKFORGE_GROWTH_MANDATE_2026-10-11.md) for high-value B2B services, the $10k/month operating-profit six-month **stretch** and $1M annualized revenue run-rate **moonshot**. Treat both as targets, not forecasts, and prove each handoff, payment, customer, cost and delivery independently. Start with qualified real leads and verified paid pilots, not website polish or fabricated scale. Existing commerce safety rules continue unchanged.
+
 ## Mission
 Build revenue-producing digital services with $0 incremental software spend.
 
