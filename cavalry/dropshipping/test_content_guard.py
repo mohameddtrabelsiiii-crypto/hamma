@@ -48,9 +48,12 @@ def run_case(unsafe):
             at.RUNTIME,at.health_gate=old_runtime,old_gate
 
 assert review_draft("Shop now — verified health-focused local artists, limited edition!", "COMING_SOON","INACTIVE")
+# Alternate prelaunch purchase CTAs must also fail closed while payouts are inactive.
+for phrase in ("Buy today", "Order today", "Purchase now", "Add to cart", "Check out now", "Ready to order"):
+    assert "prelaunch_sales_call_to_action" in review_draft(phrase, "COMING_SOON", "INACTIVE"), phrase
+# Noncommercial process copy remains allowed.
+assert review_draft("Which line-art palette do you prefer for this draft?", "COMING_SOON", "INACTIVE") == []
 assert review_draft("Exploring original abstract illustrations before our shop opens.","COMING_SOON","INACTIVE")==[]
 run_case(True)
 run_case(False)
 print("CAVALRY_DRAFT_PIPELINE_TESTS_OK rejected_unsafe_and_accepted_safe")
-
-[executed on device: DESKTOP-ADP8R8D (c08082c0-0c59-4745-87d9-daa8ea58fccb)]
