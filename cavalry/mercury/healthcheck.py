@@ -1,11 +1,8 @@
-"""MERCURY read-only commercial preflight: no sales or payment actions.
-Designed for Hermes local free scheduled model cycle. Python standard library only.
-"""
+"""MERCURY read-only preflight. No sales, payment, or customer actions."""
 from __future__ import annotations
 import json
-import time
-import urllib.error
-import urllib.request
+import os
+import subprocess
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -19,34 +16,36 @@ ROUTES = {
 }
 
 def probe(name: str, url: str) -> dict:
-    req = urllib.request.Request(url, headers={"User-Agent": "Zenvocloud-Mercury-Readiness/1.0"}, method="GET")
+    # curl uses the platform TLS trust store; certificate validation remains enabled.
+    args = ["curl", "--silent", "--show-error", "--location",
+            "--max-time", "12", "--output", os.devnull,
+            "--write-out", "%{http_code}", url]
     try:
-        with urllib.request.urlopen(req, timeout=8) as resp:
-            status = int(resp.status)
-            return {"route": name, "http_status": status, "ok": status == 200}
-    except urllib.error.HTTPError as exc:
-        return {"route": name, "http_status": int(exc.code), "ok": False}
+        reply = subprocess.run(args, check=False, capture_output=True, text=True, timeout=15)
+        raw = reply.stdout.strip()
+        code = int(raw) if raw.isdecimal() else None
+        ok = reply.returncode == 0 and code == 200
+        return {"route": name, "http_status": code, "ok": ok,
+                "tls_verification": "enabled",
+                "error": reply.stderr.strip()[:180] if not ok else None}
     except Exception as exc:
-        return {"route": name, "http_status": None, "ok": False, "error": type(exc).__name__}
+        return {"route": name, "http_status": None, "ok": False,
+                "tls_verification": "enabled", "error": type(exc).__name__}
 
 def main() -> int:
-    seen = [probe(k, url) for k, url in ROUTES.items()]
-    state = {
-        "run_at_utc": datetime.now(timezone.utc).isoformat(),
-        "kind": "read_only_route_probe",
-        "company": "Zenvocloud",
-        "completed": all(x["ok"] for x in seen),
-        "results": seen,
-        "claims_excluded": ["live lead storage", "merchant payment", "customer contact", "agent autonomy"],
-        "incremental_spend_usd": 0,
-    }
-    log = ROOT / "runtime"
-    log.mkdir(exist_ok=True)
-    (log / "latest-health.json").write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
+    results = [probe(n, u) for n, u in ROUTES.items()]
+    state = {"run_at_utc": datetime.now(timezone.utc).isoformat(),
+             "company": "Zenvocloud", "kind": "read_only_route_probe",
+             "completed": all(r["ok"] for r in results), "results": results,
+             "payment_verified": False, "lead_intake_verified": False,
+             "customer_verified": False, "incremental_spend_usd": 0}
+    log_dir = ROOT / "runtime"
+    log_dir.mkdir(exist_ok=True)
+    (log_dir / "latest-health.json").write_text(json.dumps(state, indent=2) + "\n", encoding="utf-8")
     print("MERCURY PREFLIGHT " + ("PASS" if state["completed"] else "PARTIAL"))
-    for item in seen:
-        print("{} http={} ok={}".format(item["route"], item["http_status"], item["ok"]))
-    print("No live lead, payment, or outreach tests performed.")
+    for result in results:
+        print("{} HTTP={} OK={}".format(result["route"], result["http_status"], result["ok"]))
+    print("No live customer, lead-intake, outreach, or payment verification performed.")
     return 0 if state["completed"] else 2
 
 if __name__ == "__main__":
