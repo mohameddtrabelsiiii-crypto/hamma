@@ -1,0 +1,40 @@
+{
+  "name": "angels-truth-guardian",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-12",
+  "workers_dev": true,
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "GUARDIAN_STATE",
+        "class_name": "GuardianState"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "GuardianState"
+      ]
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "*/30 * * * *"
+    ]
+  },
+  "observability": {
+    "enabled": true
+  },
+  "services": [
+    {
+      "binding": "CAVALRY_FREE_HUB",
+      "service": "cavalry-free-hub"
+    },
+    {
+      "binding": "CAVALRY_CONTROL",
+      "service": "cavalry-durable-control"
+    }
+  ]
+}
