@@ -26,5 +26,15 @@
   },
   "observability": {
     "enabled": true
-  }
+  },
+  "services": [
+    {
+      "binding": "CAVALRY_FREE_HUB",
+      "service": "cavalry-free-hub"
+    },
+    {
+      "binding": "CAVALRY_CONTROL",
+      "service": "cavalry-durable-control"
+    }
+  ]
 }
