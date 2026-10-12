@@ -1,0 +1,25 @@
+name: ANGELS Guardian — independent integrity audit
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: angels-independent-integrity
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify pinned Ed25519 proof, ledger chain and liveness freshness
+        run: node cloudflare/angels-truth-guardian/verify-proof.mjs
