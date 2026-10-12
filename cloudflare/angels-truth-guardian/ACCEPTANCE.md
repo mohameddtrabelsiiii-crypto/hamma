@@ -41,3 +41,12 @@ Every requirement remains UNVERIFIED until a separate authorized verifier record
 - GitHub issue #13 records full non-certified engineering mission. Sending an issue is **not** worker acknowledgement or execution.
 
 **Caution:** This is activation evidence, not production certification. The scheduled self-event proves autonomy for that cycle only; it does not demonstrate company-wide coverage, recovery or provider independence.
+
+## Follow-up runtime validation and known defects (2026-10-12)
+
+- Cloudflare API verified two read-only service bindings in the deployed Worker and a correctly configured Cron.
+- As of 2026-10-12T14:53Z, direct `/health` still reported `ledger_entries:1`, `observed_worker_count:0`, `last_service_probe_at:null`, company coverage UNKNOWN. This is evidence of an **unverified service observation stage**, not monitoring success. Cron propagation may be delayed, but an actual successful v2 observation must be demonstrated independently.
+- Temporary one-minute activation-test Cron was restored to the intended every-30-minutes schedule; Cloudflare GET confirmed `*/30 * * * *` at 2026-10-12T14:54:10Z.
+- **P0 before sustained operation:** `validateLedger()` deliberately fails closed after 2000 entries and performs a full signature scan on each run. Replace with a scalable, independently checkpointed scheme and test capacity under realistic retention. At two events per half-hour, the threshold could be reached in approximately 21 days; do not imply perpetual operational continuity.
+- **P0 before company monitoring:** prove scheduled service observations record correct worker outcomes and actual persisted incidents, and verify invalid false health responses are rejected.
+- **P0 before sovereignty:** private identity material still exists in only one Cloudflare provider; a separate independently managed recovery key, evidence escrow and tested backup are mandatory.
