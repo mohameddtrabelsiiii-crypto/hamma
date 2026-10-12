@@ -11,12 +11,14 @@ This is an independent **observe-only foundation** deployed separately from Cava
 - Durable, ordered hash-chained and Ed25519-signed self-observation events.
 - Integrity verification on every scheduled check and health request, fail-closed on mismatch.
 - 30-minute independent Cron schedule (UTC). A heartbeat is only liveness, **never** productive progress.
-- Public read-only `GET /health` and `GET /identity` with no public mutation API.
+- Public read-only `GET /health`, `GET /identity` and `GET /proof` with no public mutation API.
+- Read-only Cloudflare Service Bindings to two existing Cavalry Workers; probe results are not trusted as evidence of their business productivity.
+- Durable incident entries on failed service probes; never clear automatically on heartbeat alone.
 - A minimal reserved company registry schema, **not** an inventory of connected company systems.
 
 ## Absent critical requirements
 
-No external company observation connectors, producer authentication, worker receipts, incident management, autonomy-driven investigation, recovery, authority certification, independent audit service, cross-provider state backup, STOP protocol integration, active handover verification, actual disaster recovery demonstration, or independent release certification. Provider independence, cryptographic identity escrow and two observed autonomous Cron cycles remain unverified.
+Two internal Cloudflare Worker health probes are bound, but this is not full company discovery or independent external probes. Missing producer authentication, worker receipts, incident management, autonomy-driven investigation, recovery, authority certification, independent audit service, cross-provider state backup, STOP protocol integration, active handover verification, actual disaster recovery demonstration, or independent release certification. Provider independence, cryptographic identity escrow and two observed autonomous Cron cycles remain unverified.
 
 ## Certification gate
 
@@ -26,6 +28,8 @@ See `ACCEPTANCE.md`. A healthy `/health` indicates only an intact local self-obs
 
 - GET /health — public *non-sensitive* self-state and ledger fingerprint. 503 on detected integrity corruption.
 - GET /identity — public Ed25519 verification material; no private key.
+- GET /proof — latest signed ledger receipt for independent cryptographic verification.
+- Signed receipt verifier: `node verify-proof.mjs` (pin fingerprint independently).
 - Any other path or method — 404.
-- Cron every 30 minutes, creating one signed `SELF_OBSERVATION` after checking the ledger.
+- Intended operating Cron: every 30 minutes, creating signed self-observations, then signed read-only probe receipts for two known Workers. A temporary one-minute test schedule may be used during activation; restore 30 minutes after test.
 - No spending, new domains or paid model API dependencies.
