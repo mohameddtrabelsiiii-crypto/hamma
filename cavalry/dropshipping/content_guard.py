@@ -13,6 +13,7 @@ RULES = (
     ("unverified_artist_origin", r"\b(?:support\s+local\s+artists|handmade\s+by\s+local\s+artists|certified\s+local\s+artists)\b"),
     ("unsupported_reputation", r"\b(?:bestseller|best[- ]seller|5[- ]star\s+reviews?|thousands\s+of\s+(?:happy\s+)?customers)\b"),
     ("unsupported_delivery", r"\b(?:guaranteed\s+delivery|ships?\s+tomorrow|free\s+overnight\s+shipping)\b"),
+    ("paid_advertising_suggestion", r"\b(?:run|launch|buy|start|purchase|invest\s+in|pay\s+for)\s+(?:(?:a|some|new)\s+)?(?:paid\s+)?(?:ads?|advertising|sponsored\s+(?:posts?|pins?|campaigns?))\b"),
     # Until verified variant costs and fees exist, no agent may invent a margin equation.
     ("unverified_margin_formula", r"\b(?:net\s+contribution|net\s+profit|profit\s+margin)\s*(?:=|:)\s*[^\r\n]{0,160}[+\-*/×÷]"),
 )
