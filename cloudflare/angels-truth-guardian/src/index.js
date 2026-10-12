@@ -114,15 +114,16 @@ export class GuardianState extends DurableObject {
   async summary() {
     const integrity=await this.validateLedger();
     const identity=await this.identity();
+    const observedCount=this.ctx.storage.sql.exec("SELECT COUNT(*) AS n FROM registry").toArray()[0].n;
     return {
       system:"ANGELS.co Guardian",
       operating_mode:"OBSERVE_ONLY",
       production_certified:false,
-      company_monitoring_coverage:"PARTIAL_TWO_INTERNAL_WORKERS",
+      company_monitoring_coverage:observedCount===2?"PARTIAL_TWO_INTERNAL_WORKERS":"UNKNOWN",
       ledger_integrity:integrity.ok?"VERIFIED":"FAILED",
       integrity_reason:integrity.ok?null:integrity.reason,
       ledger_entries:integrity.entries,
-      observed_worker_count:this.ctx.storage.sql.exec("SELECT COUNT(*) AS n FROM registry").toArray()[0].n,
+      observed_worker_count:observedCount,
       open_incident_count:this.ctx.storage.sql.exec("SELECT COUNT(*) AS n FROM incidents WHERE status='OPEN'").toArray()[0].n,
       last_service_probe_at:await this.ctx.storage.get("last_service_probe_at") || null,
       last_cycle_at:await this.ctx.storage.get("last_cycle_at") || null,
