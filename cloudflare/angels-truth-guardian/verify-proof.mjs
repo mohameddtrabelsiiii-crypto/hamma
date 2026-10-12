@@ -20,6 +20,8 @@ try {
   const valid=verify(null,Buffer.from(proof.event_hash,"utf8"),publicKey,Buffer.from(proof.signature_ed25519_base64,"base64"));
   if(!valid) throw Error("SIGNATURE_INVALID");
   if(health.ledger_integrity!=="VERIFIED" || health.production_certified!==false) throw Error("TRUTH_STATUS_INVALID");
+  const lastSelfCycle=Date.parse(health.last_cycle_at);
+  if (!Number.isFinite(lastSelfCycle) || Date.now()-lastSelfCycle > 90*60*1000 || lastSelfCycle-Date.now() > 5*60*1000) throw Error("SCHEDULED_OBSERVATION_STALE");
   console.log(JSON.stringify({independent_verdict:"PASS",signed_event_seq:proof.seq,kind:proof.kind,identity_fingerprint:fingerprint,ledger_entries:health.ledger_entries,company_coverage:health.company_monitoring_coverage,certified:false}));
 } catch(err) {
   console.error(JSON.stringify({independent_verdict:"FAIL",reason:String(err.message || err)}));
