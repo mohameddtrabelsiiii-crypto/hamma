@@ -472,3 +472,15 @@ test('public portfolio does not expose personal GitHub username or claim paid hi
  const s=await (await w(new Request('https://taskforge.example/sitemap.xml'))).text();
  assert.match(s,/\/examples/);
 });
+
+
+test('premium redesign exposes accessible primary actions and preserves customer forms',async()=>{
+ const response=await worker()(new Request('https://taskforge.example/'));
+ assert.equal(response.status,200);
+ const html=await response.text();
+ for(const expected of ['aria-label="Primary navigation"','href="#services"','href="#order"','href="#account"','id="services"','id="result-form"','id="order"','/automation/leadops','Scope and quote are reviewed before payment.','browser-only and rules-based.']){
+  assert.ok(html.includes(expected),expected);
+ }
+ assert.match(html,/<a class="cta cta-primary" href="#order">Request a project review<\/a>/);
+ assert.match(html,/font-size:clamp\(31px,9vw,50px\)/);
+});
