@@ -22,7 +22,7 @@ test('service landing pages show accurate scopes, intake links and canonical URL
   const response=await worker()(new Request('https://taskforge.example'+path));
   assert.equal(response.status,200);
   const html=await response.text();
-  assert.match(html,/TaskForge AI/);
+  assert.match(html,/Zenvocloud/);
   assert.ok(html.includes('href="/?service='));
   assert.ok(html.includes('href="https://taskforge-ai.pages.dev'+path+'"'));
   assert.equal((await worker()(new Request('https://taskforge.example'+path,{method:'POST'}))).status,405);
@@ -438,7 +438,7 @@ test('contact and project workflow information are public, indexed and protect P
  for(const path of ['/contact','/how-it-works','/privacy']){
   const res=await w(new Request('https://taskforge.example'+path));
   assert.equal(res.status,200);
-  assert.match(await res.text(),/TaskForge AI/);
+  assert.match(await res.text(),/Zenvocloud/);
   const head=await w(new Request('https://taskforge.example'+path,{method:'HEAD'}));
   assert.equal(head.status,200);assert.equal(await head.text(),'');
   assert.equal((await w(new Request('https://taskforge.example'+path,{method:'POST'}))).status,405);
