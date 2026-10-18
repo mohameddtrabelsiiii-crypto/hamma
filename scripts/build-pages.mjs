@@ -13,6 +13,6 @@ await mkdir(out, { recursive: true });
 await writeFile(new URL("_worker.js", out), pagesWorker);
 await writeFile(
   new URL("index.html", out),
-  "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>TaskForge AI</title></head><body>TaskForge AI</body></html>\n"
+  "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Zenvocloud</title></head><body>Zenvocloud</body></html>\n"
 );
 console.log("Cloudflare Pages Worker generated from the tested source Worker.");
